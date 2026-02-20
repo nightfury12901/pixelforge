@@ -1,0 +1,120 @@
+# Dependencies
+node_modules/
+/.pnp
+.pnp.js
+
+# Testing
+/coverage
+
+# Next.js
+/.next/
+/out/
+.next
+dist
+
+# Production
+/build
+/dist
+
+# Misc
+.DS_Store
+*.pem
+.env
+.env.local
+.env.example
+.env.production.local
+.env.development.local
+.env.test.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+.DS_Store
+
+# Chrome Extension
+extension/dist/
+extension/node_modules/
+
+# Build artifacts
+.turbo
+turbo.json
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Vercel
+.vercel
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# API keys and secrets
+api_keys.txt
+secrets.txt
+
+# Database backups
+*.sql
+*.db
+
+# Build outputs
+*.tsbuildinfo
+tsconfig.tsbuildinfo
+
+# Compiled files
+*.js.map
+*.jsx.map
+*.ts.map
+*.tsx.map
+
+# Audio/Video files (if testing)
+*.mp4
+*.avi
+*.mov
+*.wav
+*.mp3
+
+# Large files
+*.zip
+*.tar.gz
+*.rar
+
+# NPM
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Docker
+.docker/
+docker-compose.override.yml
+
+# CI/CD
+.github/workflows/secrets.yml
+
+# Local development
+.env.example (should be tracked, not this)
+local/
+tmp/
+temp/

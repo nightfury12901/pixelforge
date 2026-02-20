@@ -1,0 +1,9 @@
+{
+    "name": "PixelForge AI",
+    "short_name": "PixelForge",
+    "description": "AI Portrait Generator, Image Enhancer & Background Remover",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#0E0E12",
+    "theme_color": "#8b5cf6"
+}

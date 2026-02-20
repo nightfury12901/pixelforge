@@ -1,0 +1,408 @@
+'use client';
+
+import { useState, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'react-hot-toast';
+import Image from 'next/image';
+import { ImagePlus, Wand2, Loader2, Download, Copy, Sparkles } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+
+const ASPECT_RATIOS = [
+    { label: '1:1', value: '1:1', class: 'aspect-square', width: 1024, height: 1024 },
+    { label: '16:9', value: '16:9', class: 'aspect-video', width: 1344, height: 768 },
+    { label: '9:16', value: '9:16', class: 'aspect-[9/16]', width: 768, height: 1344 },
+    { label: '4:3', value: '4:3', class: 'aspect-[4/3]', width: 1216, height: 832 },
+    { label: '3:4', value: '3:4', class: 'aspect-[3/4]', width: 832, height: 1216 },
+];
+
+const STYLES = [
+    { id: 'realistic', label: 'Realistic', emoji: '📸' },
+    { id: 'cinematic', label: 'Cinematic', emoji: '🎬' },
+    { id: 'anime', label: 'Anime', emoji: '🌸' },
+    { id: 'oil-painting', label: 'Oil Painting', emoji: '🎨' },
+    { id: 'watercolor', label: 'Watercolor', emoji: '💧' },
+    { id: 'neon', label: 'Neon Glow', emoji: '✨' },
+    { id: 'vintage', label: 'Vintage', emoji: '🏛️' },
+    { id: 'none', label: 'No Style', emoji: '∅' },
+];
+
+const STYLE_SUFFIXES: Record<string, string> = {
+    realistic: ', photorealistic, 8k uhd, detailed',
+    cinematic: ', cinematic lighting, dramatic, film grain, anamorphic lens',
+    anime: ', anime style, manga art, vibrant colors, clean lines',
+    'oil-painting': ', oil on canvas, brush strokes, classical painting style, rich textures',
+    watercolor: ', watercolor painting, soft edges, translucent colors, artistic',
+    neon: ', neon glow, cyberpunk, synthwave, vibrant neon colors, dark background',
+    vintage: ', vintage photography, film photo, retro aesthetic, sepia tones',
+    none: '',
+};
+
+interface GeneratedImage {
+    url: string;
+    prompt: string;
+    timestamp: number;
+}
+
+// ─── Inner component that reads searchParams ─────────────────────────────────
+function ImageGenInner() {
+    const searchParams = useSearchParams();
+    const [prompt, setPrompt] = useState(searchParams.get('prompt') || '');
+    const [selectedAspect, setSelectedAspect] = useState(ASPECT_RATIOS[0]);
+    const [selectedStyle, setSelectedStyle] = useState('realistic');
+    const [loading, setLoading] = useState(false);
+    const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>([]);
+    const [editsUsed, setEditsUsed] = useState(0);
+    const [refineInstruction, setRefineInstruction] = useState('');
+    const [refining, setRefining] = useState(false);
+    const [activeRefineIdx, setActiveRefineIdx] = useState<number | null>(null);
+    const FREE_EDITS = 4;
+
+    const buildFinalPrompt = () => {
+        const suffix = STYLE_SUFFIXES[selectedStyle] || '';
+        return `${prompt.trim()}${suffix}`;
+    };
+
+    const handleGenerate = async () => {
+        if (!prompt.trim()) { toast.error('Enter a prompt first'); return; }
+        setLoading(true);
+        try {
+            const finalPrompt = buildFinalPrompt();
+            const res = await fetch('/api/tools/thumbnail', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    prompt: finalPrompt,
+                    aspect_ratio: selectedAspect.value,
+                    batch_size: 1,
+                }),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                if (res.status === 402) toast.error('Not enough credits. Please upgrade.');
+                else if (res.status === 401) toast.error('Please sign in to generate images.');
+                else throw new Error(data.error || 'Generation failed');
+                return;
+            }
+
+            const images: string[] = data.data?.images || [];
+            if (images.length > 0) {
+                setGeneratedImages((prev) => [
+                    ...images.map((url: string) => ({ url, prompt: data.data.enhanced_prompt || finalPrompt, timestamp: Date.now() })),
+                    ...prev,
+                ]);
+                toast.success('Image generated!');
+            } else {
+                toast.error('No image returned. Try again.');
+            }
+        } catch (err: unknown) {
+            const e = err as Error;
+            toast.error(e.message || 'Something went wrong');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDownload = async (url: string, index: number) => {
+        try {
+            const res = await fetch(url);
+            const blob = await res.blob();
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `pixelforge-image-${index + 1}.png`;
+            a.click();
+        } catch {
+            toast.error('Download failed');
+        }
+    };
+
+    const handleRefine = async (sourceImage: GeneratedImage) => {
+        if (!refineInstruction.trim()) { toast.error('Describe what to change'); return; }
+        setRefining(true);
+        try {
+            const res = await fetch('/api/tools/refine', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    current_prompt: sourceImage.prompt,
+                    instruction: refineInstruction,
+                    edits_used: editsUsed,
+                    aspect_ratio: selectedAspect.value,
+                }),
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                if (res.status === 402) toast.error('Not enough credits for more edits. Need 0.5 credits.');
+                else throw new Error(data.error || 'Refine failed');
+                return;
+            }
+            const images: string[] = data.data?.images || [];
+            if (images.length > 0) {
+                setGeneratedImages((prev) => [
+                    ...images.map((url: string) => ({ url, prompt: data.data.refined_prompt || sourceImage.prompt, timestamp: Date.now() })),
+                    ...prev,
+                ]);
+                setEditsUsed((n) => n + 1);
+                setRefineInstruction('');
+                setActiveRefineIdx(null);
+                const wasPaid = data.data?.was_paid;
+                toast.success(wasPaid ? `Refined! (0.5 credits used)` : `Refined! ${FREE_EDITS - (editsUsed + 1)} free edits remaining`);
+            } else {
+                toast.error('No image returned. Try again.');
+            }
+        } catch (err: any) {
+            toast.error(err.message || 'Refine failed');
+        } finally {
+            setRefining(false);
+        }
+    };
+
+    return (
+        <div className="grid lg:grid-cols-[1fr,340px] gap-6">
+            {/* Left: Generated Images */}
+            <div className="space-y-4">
+                {generatedImages.length === 0 && !loading && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="glass rounded-2xl flex items-center justify-center"
+                        style={{ minHeight: 320 }}
+                    >
+                        <div className="text-center py-12">
+                            <div className="w-16 h-16 rounded-2xl bg-pink-500/10 border border-pink-500/20 flex items-center justify-center mx-auto mb-4">
+                                <ImagePlus className="h-7 w-7 text-pink-400/50" />
+                            </div>
+                            <p className="text-white/30 text-sm">Your generated images will appear here</p>
+                        </div>
+                    </motion.div>
+                )}
+
+                {loading && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="glass rounded-2xl flex items-center justify-center"
+                        style={{ minHeight: 320 }}
+                    >
+                        <div className="text-center">
+                            <div className="relative mx-auto w-14 h-14 mb-4">
+                                <Loader2 className="h-14 w-14 animate-spin text-pink-500/30" />
+                                <Sparkles className="absolute inset-0 m-auto h-5 w-5 text-pink-400" />
+                            </div>
+                            <p className="text-white/50 text-sm font-medium">Generating your image...</p>
+                            <p className="text-white/25 text-xs mt-1">Usually takes 5–15 seconds</p>
+                        </div>
+                    </motion.div>
+                )}
+
+                <AnimatePresence>
+                    {generatedImages.map((img, i) => (
+                        <motion.div
+                            key={img.timestamp}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="glass rounded-2xl overflow-hidden"
+                        >
+                            <div className={`relative w-full ${selectedAspect.class} bg-black/30`}>
+                                <Image
+                                    src={img.url}
+                                    alt={img.prompt}
+                                    fill
+                                    className="object-cover"
+                                    sizes="(max-width: 1024px) 100vw, 60vw"
+                                />
+                            </div>
+                            <div className="p-3 flex items-center justify-between gap-3">
+                                <p className="text-xs text-white/40 line-clamp-1 flex-1">{img.prompt}</p>
+                                <div className="flex gap-2 flex-shrink-0">
+                                    <button
+                                        onClick={() => { navigator.clipboard.writeText(img.prompt); toast.success('Prompt copied!'); }}
+                                        className="p-1.5 rounded-lg hover:bg-white/[0.06] text-white/40 hover:text-white/80 transition-colors"
+                                        title="Copy prompt"
+                                    >
+                                        <Copy className="h-3.5 w-3.5" />
+                                    </button>
+                                    <button
+                                        onClick={() => handleDownload(img.url, i)}
+                                        className="p-1.5 rounded-lg hover:bg-white/[0.06] text-white/40 hover:text-white/80 transition-colors"
+                                        title="Download"
+                                    >
+                                        <Download className="h-3.5 w-3.5" />
+                                    </button>
+                                    <button
+                                        onClick={() => setActiveRefineIdx(activeRefineIdx === i ? null : i)}
+                                        className={`p-1.5 rounded-lg transition-colors ${activeRefineIdx === i
+                                                ? 'bg-pink-500/20 text-pink-400'
+                                                : 'hover:bg-white/[0.06] text-white/40 hover:text-pink-400'
+                                            }`}
+                                        title="Refine with AI"
+                                    >
+                                        <Sparkles className="h-3.5 w-3.5" />
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Refine Panel */}
+                            <AnimatePresence>
+                                {activeRefineIdx === i && (
+                                    <motion.div
+                                        initial={{ height: 0, opacity: 0 }}
+                                        animate={{ height: 'auto', opacity: 1 }}
+                                        exit={{ height: 0, opacity: 0 }}
+                                        transition={{ duration: 0.2 }}
+                                        className="overflow-hidden border-t border-white/[0.06]"
+                                    >
+                                        <div className="p-3 space-y-2">
+                                            <div className="flex items-center justify-between">
+                                                <p className="text-xs font-medium text-white/60 flex items-center gap-1.5">
+                                                    <Sparkles className="h-3 w-3 text-pink-400" />
+                                                    AI Refine
+                                                </p>
+                                                <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${editsUsed < FREE_EDITS
+                                                        ? 'bg-green-500/15 text-green-400 border border-green-500/20'
+                                                        : 'bg-amber-500/15 text-amber-400 border border-amber-500/20'
+                                                    }`}>
+                                                    {editsUsed < FREE_EDITS
+                                                        ? `${FREE_EDITS - editsUsed} free edit${FREE_EDITS - editsUsed !== 1 ? 's' : ''} left`
+                                                        : '0.5 credits / edit'}
+                                                </span>
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <input
+                                                    value={refineInstruction}
+                                                    onChange={(e) => setRefineInstruction(e.target.value)}
+                                                    onKeyDown={(e) => { if (e.key === 'Enter') handleRefine(img); }}
+                                                    placeholder="e.g. make it more dramatic, add fog..."
+                                                    className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-xs text-white/90 placeholder:text-white/25 focus:outline-none focus:border-pink-500/50"
+                                                />
+                                                <Button
+                                                    onClick={() => handleRefine(img)}
+                                                    disabled={refining || !refineInstruction.trim()}
+                                                    className="h-auto px-3 py-2 bg-pink-600 hover:bg-pink-500 text-white text-xs font-medium disabled:opacity-40"
+                                                >
+                                                    {refining ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Refine'}
+                                                </Button>
+                                            </div>
+                                            <p className="text-[10px] text-white/20">Tell the AI what to change. First {FREE_EDITS} edits are free.</p>
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </motion.div>
+                    ))}
+                </AnimatePresence>
+            </div>
+
+            {/* Right: Controls */}
+            <div className="space-y-4">
+                {/* Prompt */}
+                <div className="glass rounded-2xl p-4">
+                    <label className="text-xs text-white/40 uppercase tracking-wider font-medium block mb-2">
+                        Your Prompt
+                    </label>
+                    <textarea
+                        value={prompt}
+                        onChange={(e) => setPrompt(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === 'Enter' && e.metaKey) handleGenerate(); }}
+                        placeholder="A majestic lion in a golden sunset, dramatic lighting..."
+                        rows={4}
+                        className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-3 py-2.5 text-sm text-white/90 placeholder:text-white/20 focus:outline-none focus:border-pink-500/50 resize-none"
+                    />
+                    <p className="text-[10px] text-white/20 mt-1.5">⌘ + Enter to generate</p>
+                </div>
+
+                {/* Aspect Ratio */}
+                <div className="glass rounded-2xl p-4">
+                    <label className="text-xs text-white/40 uppercase tracking-wider font-medium block mb-3">
+                        Aspect Ratio
+                    </label>
+                    <div className="grid grid-cols-5 gap-1.5">
+                        {ASPECT_RATIOS.map((ar) => (
+                            <button
+                                key={ar.value}
+                                onClick={() => setSelectedAspect(ar)}
+                                className={`py-2 rounded-lg text-xs font-medium transition-all ${selectedAspect.value === ar.value
+                                    ? 'bg-pink-500/20 border border-pink-500/50 text-pink-300'
+                                    : 'bg-white/[0.04] border border-white/[0.06] text-white/40 hover:text-white/70'
+                                    }`}
+                            >
+                                {ar.label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Style */}
+                <div className="glass rounded-2xl p-4">
+                    <label className="text-xs text-white/40 uppercase tracking-wider font-medium block mb-3">
+                        Style
+                    </label>
+                    <div className="grid grid-cols-2 gap-1.5">
+                        {STYLES.map((style) => (
+                            <button
+                                key={style.id}
+                                onClick={() => setSelectedStyle(style.id)}
+                                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all ${selectedStyle === style.id
+                                    ? 'bg-pink-500/20 border border-pink-500/40 text-pink-300'
+                                    : 'bg-white/[0.04] border border-white/[0.06] text-white/50 hover:text-white/80'
+                                    }`}
+                            >
+                                <span>{style.emoji}</span>
+                                <span>{style.label}</span>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Generate Button */}
+                <Button
+                    onClick={handleGenerate}
+                    disabled={loading || !prompt.trim()}
+                    className="w-full h-12 bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white font-semibold shadow-lg shadow-pink-500/20 transition-all"
+                >
+                    {loading ? (
+                        <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Generating...</>
+                    ) : (
+                        <><Wand2 className="h-4 w-4 mr-2" /> Generate Image</>
+                    )}
+                </Button>
+
+                <p className="text-center text-xs text-white/20">1 credit per generation</p>
+            </div>
+        </div>
+    );
+}
+
+// ─── Page: wraps inner component in Suspense for useSearchParams ─────────────
+export default function ImageGenPage() {
+    return (
+        <div className="p-6 md:p-8 pb-24 md:pb-8 max-w-5xl">
+            {/* Header */}
+            <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
+                <div className="flex items-center gap-3 mb-1">
+                    <div className="w-8 h-8 rounded-lg bg-pink-500/20 border border-pink-500/30 flex items-center justify-center">
+                        <ImagePlus className="h-4 w-4 text-pink-400" />
+                    </div>
+                    <h1 className="text-lg font-semibold text-white">Image Generator</h1>
+                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-pink-500/15 text-pink-400 border border-pink-500/20">
+                        AI Magic
+                    </span>
+                </div>
+                <p className="text-white/40 text-sm ml-11">
+                    Type a prompt and generate stunning images in any style
+                </p>
+            </motion.div>
+
+            {/* Suspense boundary for useSearchParams */}
+            <Suspense fallback={
+                <div className="glass rounded-2xl flex items-center justify-center" style={{ minHeight: 320 }}>
+                    <Loader2 className="h-8 w-8 animate-spin text-pink-500/50" />
+                </div>
+            }>
+                <ImageGenInner />
+            </Suspense>
+        </div>
+    );
+}
