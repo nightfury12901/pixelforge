@@ -1,0 +1,42 @@
+[
+  {
+    "name": "Golden Hour Breeze",
+    "prompt_template": "A beach girl walking barefoot along the shoreline during golden hour. Her hair dances in the sea breeze, and the sunlight kisses her skin with a warm, cinematic glow. Gentle waves reflect orange and pink hues as she smiles naturally toward the lens. Style: Cinematic | Golden Hour | Natural | Warm | Lifestyle"
+  },
+  {
+    "name": "Tropical Serenity",
+    "prompt_template": "A girl in a white sundress stands near a palm tree, soft shadows falling across her face. The horizon glows with pastel skies, and her gentle expression feels calm and alive, like a dreamy vlog moment. Style: Soft Pastel | Dreamy | Minimal | Tropical | Calm"
+  },
+  {
+    "name": "Tide Wanderer",
+    "prompt_template": "A man walks shirtless by the tide, jeans rolled up, sunlight reflecting on wet sand. His confident expression and cinematic lighting create a lifestyle-magazine energy. Style: Cinematic | Confident | Natural | Lifestyle | Warm"
+  },
+  {
+    "name": "Glamorous 28th Birthday",
+    "prompt_template": "Elegant woman holding a chocolate cake under a warm spotlight, wearing a glittering black gown and silver crown. Cinematic, modern vibe."
+  },
+  {
+    "name": "Retro Bollywood",
+    "prompt_template": "Dashing South Indian man with beard, yellow-tinted sunglasses, white three-piece suit, seated on a red convertible. Bright blue sky, ocean, and cityscape background."
+  },
+  {
+    "name": "Saree Elegance",
+    "prompt_template": "A beautiful girl wearing a flowing silk saree, traditional Indian jewelry, and soft makeup, standing in a vintage Bollywood studio setting. Cinematic lighting, vibrant fabric details, portrait photography, 9:16, Instagram aesthetic. Keep original facial features."
+  },
+  {
+    "name": "Father-Daughter Bench",
+    "prompt_template": "Sitting together on a wooden bench in a sunlit garden, smiling warmly at each other. Golden-hour lighting, cinematic depth of field, 85mm lens. Exact same faces as uploaded image."
+  },
+  {
+    "name": "Diwali Fireworks Terrace",
+    "prompt_template": "Hyper-realistic 4K cinematic portrait. Man in white kurta holds lit firecracker; woman in bright yellow embroidered lehenga choli holds a glittering firecracker. Diwali night, terrace with fireworks and glowing diyas. Identical faces to reference photo."
+  },
+  {
+    "name": "Pixie Cut",
+    "prompt_template": "Keep exact face, body, pose, outfit, and background from uploaded image, but change the hairstyle to a pixie cut. Natural, realistic, consistent with lighting and head shape."
+  },
+  {
+    "name": "Retro Red Dress Rose",
+    "prompt_template": "Deep red dress, golden-hour side light, one long-stemmed red rose near chest, gentle affectionate gaze, soft bokeh, 90s romantic movie aesthetic. 9:16, ultra-realistic."
+  }
+]
