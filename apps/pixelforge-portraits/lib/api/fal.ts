@@ -138,18 +138,33 @@ export async function generatePortrait(options: PortraitGenerationOptions) {
         else if (options.aspect_ratio === '1:1') { width = 1024; height = 1024; }
 
         const generateSingle = async () => {
-            // If we have an image, we should ideally use image-to-image. For now, we use flux/schnell
-            // but pass the prompt. Schnell text-to-image:
-            const result = await fal.subscribe('fal-ai/flux/schnell', {
-                input: {
-                    prompt: options.prompt,
-                    num_inference_steps: options.num_inference_steps || 4,
-                    image_size: { width, height }
-                },
-            }) as any;
+            // Use FaceID (PuLID) if a reference image is provided
+            if (options.image) {
+                const result = await fal.subscribe('fal-ai/flux-pulid', {
+                    input: {
+                        prompt: options.prompt,
+                        reference_image_url: options.image,
+                        image_size: { width, height },
+                        num_inference_steps: options.num_inference_steps || 20,
+                        guidance_scale: options.guidance_scale || 3.5
+                    },
+                }) as any;
 
-            const url = result?.data?.images?.[0]?.url || result?.images?.[0]?.url;
-            return url;
+                const url = result?.data?.images?.[0]?.url || result?.images?.[0]?.url;
+                return url;
+            } else {
+                // Normal text-to-image without facial reference
+                const result = await fal.subscribe('fal-ai/flux/schnell', {
+                    input: {
+                        prompt: options.prompt,
+                        num_inference_steps: options.num_inference_steps || 4,
+                        image_size: { width, height }
+                    },
+                }) as any;
+
+                const url = result?.data?.images?.[0]?.url || result?.images?.[0]?.url;
+                return url;
+            }
         };
 
         const promises = Array.from({ length: numOutputs }, () => generateSingle());

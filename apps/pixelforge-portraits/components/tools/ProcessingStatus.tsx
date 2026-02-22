@@ -27,13 +27,13 @@ export function ProcessingStatus({ generationId, templatePreview, onComplete }: 
           const data = await response.json();
 
           if (data.success) {
-            if (data.data.generation.status === 'completed') {
+            if (data.data.status === 'completed') {
               setStatus('completed');
-              setOutputUrl(data.data.output_url);
+              setOutputUrl(data.data.output_image_url);
               clearInterval(interval);
-            } else if (data.data.generation.status === 'failed') {
+            } else if (data.data.status === 'failed') {
               setStatus('failed');
-              setError(data.data.generation.error_message || 'Generation failed');
+              setError(data.data.error_message || 'Generation failed');
               clearInterval(interval);
             }
           }
@@ -107,6 +107,7 @@ export function ProcessingStatus({ generationId, templatePreview, onComplete }: 
               alt="Processing"
               fill
               className="object-cover"
+              sizes="(max-width: 768px) 100vw, 33vw"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end p-6">
               <div className="space-y-2">
@@ -138,6 +139,7 @@ export function ProcessingStatus({ generationId, templatePreview, onComplete }: 
               alt="Generated portrait"
               fill
               className="object-cover"
+              sizes="(max-width: 768px) 100vw, 33vw"
             />
           </div>
 
