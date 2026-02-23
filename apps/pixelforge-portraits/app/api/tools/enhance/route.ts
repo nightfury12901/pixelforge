@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient, createAdminClient, createClientFromToken } from '@/lib/supabase/server';
 import { checkCredits, deductCredits } from '@/lib/credits';
-import { enhanceImage } from '@/lib/api/pollinations';
+import { enhanceImage } from '@/lib/api/fal';
 import { checkRateLimit } from '@/lib/ratelimit';
 
 export async function POST(request: NextRequest) {

@@ -36,11 +36,7 @@ const nextConfig = {
     serverActions: {
       bodySizeLimit: '10mb',
     },
-    serverComponentsExternalPackages: [
-      '@imgly/background-removal-node',
-      'sharp',
-      'onnxruntime-node',
-    ],
+    // Removed external ML packages to fix 250MB Vercel limit
   },
   async headers() {
     return [

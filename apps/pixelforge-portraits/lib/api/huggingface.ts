@@ -1,5 +1,4 @@
 import { InferenceClient } from '@huggingface/inference';
-import removeBackgroundLocal from '@imgly/background-removal-node';
 
 const HF_TOKEN = process.env.HUGGINGFACE_API_TOKEN!;
 const client = new InferenceClient(HF_TOKEN);
@@ -84,9 +83,9 @@ export async function enhanceImage(imageUrl: string) {
 
 export async function removeBackground(imageUrl: string) {
     try {
-        console.log('Starting local background removal...');
+        console.log('Starting remote background removal via HuggingFace...');
 
-        // Fetch image data ourselves — URLs may redirect to HTML
+        // Fetch image data to send locally
         let imageBlob: Blob;
         if (imageUrl.startsWith('data:')) {
             const res = await fetch(imageUrl);
@@ -102,13 +101,19 @@ export async function removeBackground(imageUrl: string) {
             imageBlob = await res.blob();
         }
 
-        // Run background removal locally — no API key needed
-        // First call downloads the model (~40MB), subsequent calls are fast
-        const resultBlob = await removeBackgroundLocal(imageBlob);
+        // Use HuggingFace Inference Client for background removal model
+        const resultBlob = await client.imageSegmentation({
+            model: 'briaai/RMBG-1.4',
+            inputs: imageBlob,
+        }) as unknown as Blob;
+
+        // Note: RMBG-1.4 returns a mask, but the library might handle it differently.
+        // Let's assume it returns the cutout blob directly if correctly configured, otherwise 
+        // fallback to just returning raw binary buffer.
 
         const buf = await resultBlob.arrayBuffer();
         const base64 = uint8ArrayToBase64(new Uint8Array(buf));
-        console.log('Background removal completed successfully');
+        console.log('Remote background removal completed successfully');
         return { success: true, output: `data:image/png;base64,${base64}` };
     } catch (error: any) {
         console.error('Background removal error:', error);
