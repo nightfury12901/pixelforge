@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom/client';
 import './popup.css';
 
-const BASE_URL = 'http://localhost:3000';
+const BASE_URL = 'https://pixelforgeportraits.vercel.app';
 
 // Minimal particle component
 function Particles() {

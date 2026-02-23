@@ -90,7 +90,7 @@ function showResultModal(prompt: string) {
       <button id="pf-copy-btn" style="flex: 1; background: #111; border: 1px solid #333; padding: 8px 12px; border-radius: 6px; font-weight: 500; font-size: 12px; color: #eee; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s;">
         Copy Prompt
       </button>
-      <a href="http://localhost:3000/dashboard/image-gen?prompt=${encodeURIComponent(cleanedPrompt)}" target="_blank" style="flex: 1; background: #fff; color: #000; border: none; padding: 8px 12px; border-radius: 6px; font-weight: 600; font-size: 12px; cursor: pointer; text-decoration: none; text-align: center; display: flex; align-items: center; justify-content: center; transition: all 0.2s;">
+      <a href="https://pixelforgeportraits.vercel.app/dashboard/image-gen?prompt=${encodeURIComponent(cleanedPrompt)}" target="_blank" style="flex: 1; background: #fff; color: #000; border: none; padding: 8px 12px; border-radius: 6px; font-weight: 600; font-size: 12px; cursor: pointer; text-decoration: none; text-align: center; display: flex; align-items: center; justify-content: center; transition: all 0.2s;">
         Generate Image →
       </a>
     </div>

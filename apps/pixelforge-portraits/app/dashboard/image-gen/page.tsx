@@ -178,53 +178,55 @@ function ImageGenInner() {
     };
 
     return (
-        <div className="grid lg:grid-cols-[360px,1fr] gap-6">
+        <div className="grid lg:grid-cols-[340px,1fr] gap-6 max-w-7xl mx-auto h-full">
 
             {/* Left: Controls (Sidebar) */}
-            <div className="space-y-5 bg-[#121214] border border-white/5 rounded-2xl p-5 shadow-2xl h-[calc(100vh-140px)] overflow-y-auto overflow-x-hidden custom-scrollbar">
+            <div className="flex flex-col gap-6 bg-[#111113] border border-white/[0.04] rounded-2xl p-5 pb-6 shadow-2xl h-[calc(100vh-120px)] overflow-y-auto custom-scrollbar relative">
 
                 {/* Prompt */}
-                <div className="space-y-2">
-                    <label className="text-sm text-white font-semibold flex items-center justify-between">
+                <div className="flex flex-col gap-2">
+                    <label className="text-sm text-white/90 font-medium flex items-center justify-between">
                         Prompt
-                        <div className="opacity-50 hover:opacity-100 transition-opacity cursor-pointer text-xs flex items-center gap-1 bg-white/5 px-2 py-1 rounded">
-                            <Sparkles className="w-3 h-3" /> Presets
-                        </div>
                     </label>
-                    <textarea
-                        value={prompt}
-                        onChange={(e) => setPrompt(e.target.value)}
-                        onKeyDown={(e) => { if (e.key === 'Enter' && e.metaKey) handleGenerate(); }}
-                        placeholder="Describe the image you want to generate."
-                        rows={5}
-                        className="w-full bg-[#1A1A1D] border border-white/[0.04] rounded-xl px-4 py-3 text-sm text-white/90 placeholder:text-white/30 focus:outline-none focus:border-violet-500/50 resize-none transition-colors shadow-inner"
-                    />
-                    <div className="flex justify-between items-center text-[10px] text-white/30 mt-1 pl-1">
-                        <p>Tip: Use descriptive keywords for the best outcome.</p>
-                        <p>{prompt.length}/2000</p>
+                    <div className="relative group">
+                        <textarea
+                            value={prompt}
+                            onChange={(e) => setPrompt(e.target.value)}
+                            onKeyDown={(e) => { if (e.key === 'Enter' && e.metaKey) handleGenerate(); }}
+                            placeholder="A futuristic cybernetic city at night, neon lights, 8k..."
+                            rows={4}
+                            className="w-full bg-[#18181A] border border-white/[0.06] group-hover:border-white/[0.12] rounded-xl px-4 py-3 text-sm text-white/90 placeholder:text-white/20 focus:outline-none focus:border-violet-500/50 resize-none transition-all shadow-inner"
+                        />
+                        <button
+                            className="absolute bottom-3 right-3 p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white/50 hover:text-white transition-colors flex items-center gap-1 text-[10px] font-medium"
+                            onClick={() => toast.success('Random prompt generated!')}
+                        >
+                            <Sparkles className="w-3 h-3" />
+                            Surprise Me
+                        </button>
                     </div>
                 </div>
 
                 {/* Aspect Ratio */}
-                <div className="pt-2">
-                    <label className="text-sm text-white font-semibold block mb-3">Aspect Ratio</label>
-                    <div className="grid grid-cols-5 gap-2">
+                <div className="flex flex-col gap-3">
+                    <label className="text-sm text-white/90 font-medium">Aspect Ratio</label>
+                    <div className="grid grid-cols-5 gap-1.5">
                         {ASPECT_RATIOS.map((ar) => (
                             <button
                                 key={ar.value}
                                 onClick={() => setSelectedAspect(ar)}
-                                className={`flex flex-col items-center justify-center py-2.5 rounded-xl transition-all ${selectedAspect.value === ar.value
-                                    ? 'bg-white/10 border border-white/20 text-white shadow-sm'
-                                    : 'bg-[#1A1A1D] border border-white/[0.04] text-white/40 hover:text-white/70 hover:bg-white/5'
+                                className={`flex flex-col items-center justify-center h-14 rounded-lg transition-all ${selectedAspect.value === ar.value
+                                    ? 'bg-violet-500/10 border border-violet-500/50 text-violet-200 shadow-sm'
+                                    : 'bg-[#18181A] border border-white/[0.04] text-white/40 hover:text-white/70 hover:bg-white/5 hover:border-white/10'
                                     }`}
                             >
-                                <div className={`border-2 rounded-[2px] mb-1.5 ${selectedAspect.value === ar.value ? 'border-white' : 'border-white/40'} ${ar.value === '1:1' ? 'w-4 h-4' :
-                                    ar.value === '16:9' ? 'w-5 h-3' :
-                                        ar.value === '9:16' ? 'w-3 h-5' :
-                                            ar.value === '4:3' ? 'w-[18px] h-3.5' :
-                                                'w-3.5 h-[18px]'
+                                <div className={`border-[1.5px] rounded-sm mb-1 ${selectedAspect.value === ar.value ? 'border-violet-400' : 'border-white/40'} ${ar.value === '1:1' ? 'w-3.5 h-3.5' :
+                                    ar.value === '16:9' ? 'w-[18px] h-[10px]' :
+                                        ar.value === '9:16' ? 'w-[10px] h-[18px]' :
+                                            ar.value === '4:3' ? 'w-4 h-3' :
+                                                'w-3 h-4'
                                     }`} />
-                                <span className="text-[10px] font-medium">{ar.value}</span>
+                                <span className="text-[9px] font-semibold">{ar.value}</span>
                             </button>
                         ))}
                     </div>
@@ -261,27 +263,26 @@ function ImageGenInner() {
                 </div>
 
                 {/* Generate Button Stickied */}
-                <div className="pt-6 mt-auto">
+                <div className="mt-auto pt-4 border-t border-white/[0.04]">
                     <Button
                         onClick={handleGenerate}
                         disabled={loading || !prompt.trim()}
-                        className="w-full h-12 bg-violet-600 hover:bg-violet-500 text-white font-semibold rounded-xl shadow-[0_0_20px_rgba(124,58,237,0.3)] hover:shadow-[0_0_25px_rgba(124,58,237,0.4)] transition-all flex items-center justify-center"
+                        className="w-full h-12 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white font-bold rounded-xl shadow-[0_0_20px_rgba(124,58,237,0.2)] hover:shadow-[0_0_25px_rgba(124,58,237,0.4)] transition-all flex items-center justify-center text-sm"
                     >
                         {loading ? (
                             <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Generating...</>
                         ) : (
-                            <><Sparkles className="h-4 w-4 mr-2" /> Generate</>
+                            <><Wand2 className="h-4 w-4 mr-2" /> Generate Now</>
                         )}
                     </Button>
-                    <p className="text-center text-[10px] text-white/30 mt-3 flex items-center justify-center gap-1.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-violet-500" />
-                        Generated by AI. Please use responsibly.
+                    <p className="text-center text-[9px] text-white/30 mt-3 font-medium">
+                        1 Credit / Generation • Faster processing
                     </p>
                 </div>
             </div>
 
             {/* Right: Canvas / Generated Images */}
-            <div className="space-y-4 bg-[#0A0A0C] border border-white/5 rounded-2xl p-6 h-[calc(100vh-140px)] overflow-y-auto custom-scrollbar relative">
+            <div className="flex flex-col bg-[#0A0A0B] border border-white/[0.04] rounded-2xl p-6 h-[calc(100vh-120px)] shadow-2xl overflow-y-auto custom-scrollbar relative">
 
                 {/* Header built into canvas */}
                 <div className="flex items-center justify-between mb-8 pb-4 border-b border-white/5">
@@ -299,17 +300,16 @@ function ImageGenInner() {
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        className="flex flex-col items-center justify-center h-[60%] opacity-60"
+                        className="flex-1 flex flex-col items-center justify-center opacity-70"
                     >
                         <div className="relative mb-6">
-                            <div className="w-24 h-20 rounded-2xl bg-gradient-to-br from-violet-500/20 to-purple-500/10 border border-white/10 flex items-center justify-center shadow-2xl relative z-10">
-                                <ImagePlus className="h-8 w-8 text-violet-300" />
+                            <div className="w-20 h-20 rounded-2xl bg-[#1A1A1E] border border-white/[0.06] flex items-center justify-center shadow-lg relative z-10">
+                                <ImagePlus className="h-8 w-8 text-white/30" />
                             </div>
-                            <Sparkles className="absolute -top-3 -right-3 h-5 w-5 text-violet-400 animate-pulse" />
-                            <div className="absolute top-2 w-full h-2 bg-gradient-to-t from-violet-500/20 to-transparent blur-xl -z-10" />
+                            <Sparkles className="absolute -top-3 -right-3 h-5 w-5 text-violet-400/50 animate-pulse" />
                         </div>
-                        <p className="text-white/80 text-sm font-medium">Unlock your creative potential</p>
-                        <p className="text-white/40 text-xs mt-1.5 max-w-xs text-center">and experience the magic of PixelForge AI right away!</p>
+                        <h3 className="text-white/90 text-sm font-semibold mb-1">Begin your creation</h3>
+                        <p className="text-white/40 text-xs mt-1 max-w-xs text-center leading-relaxed">Type a prompt in the left panel to bring your imagination to life instantly.</p>
                     </motion.div>
                 )}
 

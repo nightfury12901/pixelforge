@@ -61,7 +61,7 @@ chrome.runtime.onMessage.addListener((request: any, sender: any, sendResponse: a
 
   if (request.action === 'getPrompt') {
     // Send request to backend
-    fetch('http://localhost:3000/api/tools/prompt-extract', {
+    fetch('https://pixelforgeportraits.vercel.app/api/tools/prompt-extract', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

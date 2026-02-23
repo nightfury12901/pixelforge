@@ -65,19 +65,37 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Image URL required' }, { status: 400 });
     }
 
-    // Check credits
-    const creditsCheck = await checkCredits(user.id);
-    if (!creditsCheck.hasCredits) {
-      return NextResponse.json(
-        { error: 'Insufficient credits', remaining: 0 },
-        { status: 402 }
-      );
-    }
+    // 5 Free Daily Background Removals Logic
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-    // Deduct credits
-    const deductResult = await deductCredits(user.id, 'background_remove');
-    if (!deductResult.success) {
-      return NextResponse.json({ error: deductResult.error }, { status: 400 });
+    const { count } = await (adminSupabase as any)
+      .from('generations')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .eq('operation_type', 'background_remove')
+      .gte('created_at', today.toISOString());
+
+    const hasExceededFreeLimit = count !== null && count >= 5;
+    let creditsRemaining = profile.credits_remaining;
+    let creditsUsedForThis = 0;
+
+    if (hasExceededFreeLimit) {
+      const creditsCheck = await checkCredits(user.id);
+      if (!creditsCheck.hasCredits) {
+        return NextResponse.json(
+          { error: 'Daily free limit reached (5/5). Please purchase a pack to continue removing backgrounds.', remaining: 0 },
+          { status: 402 }
+        );
+      }
+
+      // Deduct 1 credit using an operation that costs 1 (e.g., 'image_edit' costs 1)
+      const deductResult = await deductCredits(user.id, 'image_edit');
+      if (!deductResult.success) {
+        return NextResponse.json({ error: deductResult.error }, { status: 400 });
+      }
+      creditsRemaining = deductResult.remaining;
+      creditsUsedForThis = 1;
     }
 
     // Create generation record
@@ -88,7 +106,7 @@ export async function POST(request: NextRequest) {
         operation_type: 'background_remove',
         input_image_url: image_url,
         status: 'processing',
-        credits_used: 1,
+        credits_used: creditsUsedForThis,
       })
       .select()
       .single();
@@ -106,7 +124,7 @@ export async function POST(request: NextRequest) {
       data: {
         generation_id: generation!.id,
         status: 'processing',
-        credits_remaining: deductResult.remaining,
+        credits_remaining: creditsRemaining,
       },
     });
   } catch (error: any) {
