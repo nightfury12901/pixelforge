@@ -178,7 +178,7 @@ function ImageGenInner() {
     };
 
     return (
-        <div className="grid lg:grid-cols-[340px,1fr] gap-6 max-w-7xl mx-auto h-full">
+        <div className="grid lg:grid-cols-[340px,1fr] gap-6 w-full h-full">
 
             {/* Left: Controls (Sidebar) */}
             <div className="flex flex-col gap-6 bg-[#111113] border border-white/[0.04] rounded-2xl p-5 pb-6 shadow-2xl h-[calc(100vh-120px)] overflow-y-auto custom-scrollbar relative">
@@ -434,7 +434,7 @@ function ImageGenInner() {
 // ─── Page: wraps inner component in Suspense for useSearchParams ─────────────
 export default function ImageGenPage() {
     return (
-        <div className="p-6 md:p-8 pb-24 md:pb-8 max-w-5xl">
+        <div className="p-6 md:p-8 h-full w-full flex flex-col">
             {/* Header */}
             <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
                 <div className="flex items-center gap-3 mb-1">
@@ -452,13 +452,15 @@ export default function ImageGenPage() {
             </motion.div>
 
             {/* Suspense boundary for useSearchParams */}
-            <Suspense fallback={
-                <div className="glass rounded-2xl flex items-center justify-center" style={{ minHeight: 320 }}>
-                    <Loader2 className="h-8 w-8 animate-spin text-pink-500/50" />
-                </div>
-            }>
-                <ImageGenInner />
-            </Suspense>
+            <div className="flex-1 min-h-0">
+                <Suspense fallback={
+                    <div className="glass rounded-2xl flex items-center justify-center h-full w-full">
+                        <Loader2 className="h-8 w-8 animate-spin text-pink-500/50" />
+                    </div>
+                }>
+                    <ImageGenInner />
+                </Suspense>
+            </div>
         </div>
     );
 }
