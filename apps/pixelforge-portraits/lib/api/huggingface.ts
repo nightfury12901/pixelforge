@@ -101,17 +101,25 @@ export async function removeBackground(imageUrl: string) {
             imageBlob = await res.blob();
         }
 
-        // Use HuggingFace Inference Client for background removal model
-        const resultBlob = await client.imageSegmentation({
-            model: 'briaai/RMBG-1.4',
-            inputs: imageBlob,
-        }) as unknown as Blob;
+        // Use direct fetch to bypass the SDK router bug for RMBG-1.4
+        const response = await fetch(
+            "https://api-inference.huggingface.co/models/briaai/RMBG-1.4",
+            {
+                headers: {
+                    Authorization: `Bearer ${HF_TOKEN}`,
+                    "Content-Type": "application/octet-stream",
+                },
+                method: "POST",
+                body: imageBlob,
+            }
+        );
 
-        // Note: RMBG-1.4 returns a mask, but the library might handle it differently.
-        // Let's assume it returns the cutout blob directly if correctly configured, otherwise 
-        // fallback to just returning raw binary buffer.
+        if (!response.ok) {
+            const errText = await response.text();
+            throw new Error(`HF API Error: ${response.status} ${errText}`);
+        }
 
-        const buf = await resultBlob.arrayBuffer();
+        const buf = await response.arrayBuffer();
         const base64 = uint8ArrayToBase64(new Uint8Array(buf));
         console.log('Remote background removal completed successfully');
         return { success: true, output: `data:image/png;base64,${base64}` };
