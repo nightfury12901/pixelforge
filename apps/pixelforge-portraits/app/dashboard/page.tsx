@@ -61,7 +61,7 @@ export default function DashboardPage() {
             </motion.div>
 
             {/* Premium Bento Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 max-w-6xl mt-4">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 max-w-6xl mx-auto mt-4">
 
                 {/* 1. AI Portraits (Col 7) */}
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="md:col-span-12 lg:col-span-7 flex">

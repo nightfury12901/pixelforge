@@ -40,7 +40,7 @@ export default function PricingPage() {
             <Pricing />
 
             <footer className="border-t border-gray-100 py-8 text-center text-sm text-muted-foreground">
-                <p>© 2026 PixelForge AI. All rights reserved. Made with ❤️ in India</p>
+                <p>© 2026 PixelForge AI. All rights reserved.</p>
             </footer>
         </main>
     );
