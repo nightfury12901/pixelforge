@@ -27,7 +27,7 @@ export async function extractPromptFromImage(imageBase64: string): Promise<{ suc
       ],
       model: 'meta-llama/llama-4-scout-17b-16e-instruct',
       temperature: 0.7,
-      max_tokens: 500,
+      max_tokens: 1500,
     });
 
     const prompt = completion.choices[0]?.message?.content;
@@ -58,7 +58,7 @@ export async function enhancePrompt(userPrompt: string): Promise<{ success: bool
       ],
       model: 'meta-llama/llama-4-scout-17b-16e-instruct',
       temperature: 0.7,
-      max_tokens: 300,
+      max_tokens: 800,
     });
 
     const prompt = completion.choices[0]?.message?.content;
