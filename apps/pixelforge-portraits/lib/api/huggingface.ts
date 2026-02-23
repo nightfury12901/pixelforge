@@ -101,9 +101,9 @@ export async function removeBackground(imageUrl: string) {
             imageBlob = await res.blob();
         }
 
-        // Use direct fetch to bypass the SDK router bug for RMBG-1.4
+        // Use direct fetch to bypass the SDK router bug for RMBG-1.4 (and use the new HF router domain)
         const response = await fetch(
-            "https://api-inference.huggingface.co/models/briaai/RMBG-1.4",
+            "https://router.huggingface.co/hf-inference/models/briaai/RMBG-1.4",
             {
                 headers: {
                     Authorization: `Bearer ${HF_TOKEN}`,
