@@ -110,9 +110,9 @@ export default function BackgroundPage() {
                         <div
                             {...getRootProps()}
                             className={`flex-1 min-h-[300px] studio-canvas rounded-2xl flex items-center justify-center cursor-pointer transition-all duration-200 ${isDragActive ? 'border-green-500/50 bg-green-500/[0.04]' : 'drop-zone'
-                                } ${imageUrl ? 'p-0 overflow-hidden' : 'p-8'} ${tier === 'starter' || tier === 'free' ? 'opacity-50 pointer-events-none' : ''}`}
+                                } ${imageUrl ? 'p-0 overflow-hidden' : 'p-8'}`}
                         >
-                            <input {...getInputProps()} disabled={tier === 'starter' || tier === 'free'} />
+                            <input {...getInputProps()} />
                             {imageUrl ? (
                                 <div className="relative w-full h-full group">
                                     <img src={imageUrl} alt="Original" className="w-full h-full object-contain rounded-2xl" />
@@ -245,14 +245,7 @@ export default function BackgroundPage() {
                     )}
                 </button>
 
-                {(tier === 'starter' || tier === 'free') && (
-                    <div className="mt-2 text-center p-3 rounded-xl bg-orange-500/10 border border-orange-500/20">
-                        <p className="text-xs text-orange-400 font-medium mb-2">Background Removal requires Creator Pack</p>
-                        <button onClick={() => router.push('/pricing')} className="text-xs font-semibold text-white bg-orange-500 hover:bg-orange-600 px-3 py-1.5 rounded-lg w-full transition-colors">
-                            Upgrade Now
-                        </button>
-                    </div>
-                )}
+
             </div>
 
             {/* Mobile action button */}

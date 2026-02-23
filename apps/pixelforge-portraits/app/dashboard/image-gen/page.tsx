@@ -290,10 +290,6 @@ function ImageGenInner() {
                         <h2 className="text-lg font-bold text-white tracking-tight">Generate List</h2>
                         <p className="text-xs text-white/40 mt-1">The generated results will securely sync with your dashboard. Save your favorites.</p>
                     </div>
-                    <div className="flex gap-2">
-                        <span className="px-3 py-1.5 bg-white/10 rounded-lg text-xs font-semibold text-white">All</span>
-                        <span className="px-3 py-1.5 text-white/40 hover:text-white/80 cursor-pointer text-xs font-medium transition-colors">Images</span>
-                    </div>
                 </div>
                 {/* Empty State */}
                 {generatedImages.length === 0 && !loading && (
