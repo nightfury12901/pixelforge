@@ -20,21 +20,22 @@ export function Hero() {
         setGeneratedImage(null);
 
         try {
-            const res = await fetch('/api/fal/generate', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ prompt }),
+            const seed = Math.floor(Math.random() * 1000000);
+            const encodedPrompt = encodeURIComponent(prompt);
+            const pollUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=768&height=1024&nologo=true&seed=${seed}&model=flux`;
+
+            // Preload the image so it doesn't show broken while loading
+            const img = new globalThis.Image();
+            img.src = pollUrl;
+            await new Promise((resolve, reject) => {
+                img.onload = resolve;
+                img.onerror = () => reject(new Error('Failed to load image'));
             });
 
-            if (!res.ok) throw new Error('Generation failed');
-
-            const data = await res.json();
-            if (data.imageUrl) {
-                setGeneratedImage(data.imageUrl);
-            }
+            setGeneratedImage(pollUrl);
         } catch (error) {
             console.error(error);
-            // Fallback for demo if the FAL API key isn't provided or billing fails
+            // Fallback for demo if the generation fails
             setGeneratedImage('https://images.unsplash.com/photo-1542362567-b07e54358753?q=80&w=1470&auto=format&fit=crop');
         } finally {
             setIsGenerating(false);
@@ -49,11 +50,11 @@ export function Hero() {
                 autoPlay
                 muted
                 loop
-                className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none"
+                className="absolute inset-0 w-full h-full object-cover opacity-30 pointer-events-none"
             >
-                <source src="https://cdn.pixabay.com/video/2021/08/04/83896-584718012_large.mp4" type="video/mp4" />
+                <source src="https://cdn.pixabay.com/video/2023/06/18/167732-837330277_large.mp4" type="video/mp4" />
             </video>
-            <div className="absolute inset-0 bg-gradient-to-b from-[#09090b]/40 via-[#09090b]/80 to-[#09090b] pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-b from-[#09090b]/60 via-[#09090b]/80 to-[#09090b] pointer-events-none" />
 
             <div className="container mx-auto px-4 py-16 flex flex-col md:flex-row items-center gap-12 relative z-10">
 
