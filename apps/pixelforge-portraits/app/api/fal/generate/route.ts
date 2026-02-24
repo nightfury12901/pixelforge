@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { generateImageWithFal } from '@/lib/api/fal';
 
 export async function POST(req: Request) {
     try {
@@ -8,37 +9,16 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Prompt is required' }, { status: 400 });
         }
 
-        const pollinationsKey = process.env.POLLINATIONS_API_KEY;
-        if (!pollinationsKey) {
+        const result = await generateImageWithFal(prompt, '3:4');
+
+        if (!result.success || !result.url) {
             return NextResponse.json(
-                { error: 'POLLINATIONS_API_KEY is not configured.' },
+                { error: result.error || 'Failed to generate image from Fal API' },
                 { status: 500 }
             );
         }
 
-        const seed = Math.floor(Math.random() * 1000000);
-        const encodedPrompt = encodeURIComponent(prompt);
-        // Using Pollinations flux model
-        const imageUrl = `https://gen.pollinations.ai/image/${encodedPrompt}?model=klein-large&width=768&height=1024&seed=${seed}&nologo=true`;
-
-        // Verify the URL works
-        const response = await fetch(imageUrl, {
-            headers: {
-                'Authorization': `Bearer ${pollinationsKey}`
-            }
-        });
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Pollinations API error:', errorText);
-            return NextResponse.json({ error: 'Failed to generate image from Pollinations API' }, { status: response.status });
-        }
-
-        const arrayBuffer = await response.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
-        const base64 = `data:image/jpeg;base64,${buffer.toString('base64')}`;
-
-        return NextResponse.json({ imageUrl: base64 });
+        return NextResponse.json({ imageUrl: result.url });
 
     } catch (error) {
         console.error('Error generating image:', error);
