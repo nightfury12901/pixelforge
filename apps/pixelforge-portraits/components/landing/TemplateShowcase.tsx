@@ -1,14 +1,14 @@
 import { Sparkles } from 'lucide-react';
 
 const sampleStyles = [
-    { name: 'Bollywood Glamour', category: 'Trending', color: 'from-pink-500 to-rose-600', image: 'https://images.unsplash.com/photo-1615886737513-4c5eb445749f?q=80&w=1470&auto=format&fit=crop' },
-    { name: 'LinkedIn Professional', category: 'Professional', color: 'from-blue-500 to-indigo-600', image: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=1587&auto=format&fit=crop' },
-    { name: 'Royal Mughal', category: 'Indian', color: 'from-amber-500 to-orange-600', image: 'https://images.unsplash.com/photo-1583391733958-6902d13b4db2?q=80&w=1374&auto=format&fit=crop' },
-    { name: 'Neon Cyberpunk', category: 'Artistic', color: 'from-cyan-400 to-violet-600', image: 'https://images.unsplash.com/photo-1555680202-c86f0e12f086?q=80&w=1470&auto=format&fit=crop' },
-    { name: 'Watercolor Dream', category: 'Artistic', color: 'from-teal-400 to-blue-500', image: 'https://images.unsplash.com/photo-1518382473041-e94d805dd00f?q=80&w=1470&auto=format&fit=crop' },
-    { name: 'Desi Wedding', category: 'Indian', color: 'from-rose-500 to-pink-600', image: 'https://images.unsplash.com/photo-1583391265517-35bbbd0e1eb8?q=80&w=1374&auto=format&fit=crop' },
-    { name: 'Studio Headshot', category: 'Professional', color: 'from-slate-500 to-gray-600', image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1528&auto=format&fit=crop' },
-    { name: 'Pop Art', category: 'Artistic', color: 'from-yellow-400 to-red-500', image: 'https://images.unsplash.com/photo-1549887552-cb1071d3e5ca?q=80&w=1530&auto=format&fit=crop' },
+    { name: 'Bollywood Glamour', category: 'Trending', color: 'from-pink-500 to-rose-600', image: '/templates/bollywood.png' },
+    { name: 'LinkedIn Professional', category: 'Professional', color: 'from-blue-500 to-indigo-600', image: '/templates/linkedin.png' },
+    { name: 'Royal Mughal', category: 'Indian', color: 'from-amber-500 to-orange-600', image: '/templates/mughal.png' },
+    { name: 'Neon Cyberpunk', category: 'Artistic', color: 'from-cyan-400 to-violet-600', image: '/templates/neon.png' },
+    { name: 'Watercolor Dream', category: 'Artistic', color: 'from-teal-400 to-blue-500', image: '/templates/watercolor.png' },
+    { name: 'Desi Wedding', category: 'Indian', color: 'from-rose-500 to-pink-600', image: '/templates/wedding.png' },
+    { name: 'Studio Headshot', category: 'Professional', color: 'from-slate-500 to-gray-600', image: '/templates/studio.png' },
+    { name: 'Pop Art', category: 'Artistic', color: 'from-yellow-400 to-red-500', image: '/templates/popart.png' },
 ];
 
 export function TemplateShowcase() {

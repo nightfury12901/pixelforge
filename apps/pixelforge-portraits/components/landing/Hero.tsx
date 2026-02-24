@@ -52,7 +52,7 @@ export function Hero() {
                 loop
                 className="absolute inset-0 w-full h-full object-cover opacity-30 pointer-events-none"
             >
-                <source src="https://cdn.pixabay.com/video/2023/06/18/167732-837330277_large.mp4" type="video/mp4" />
+                <source src="https://assets.mixkit.co/videos/preview/mixkit-abstract-purple-and-blue-light-waves-background-34351-large.mp4" type="video/mp4" />
             </video>
             <div className="absolute inset-0 bg-gradient-to-b from-[#09090b]/60 via-[#09090b]/80 to-[#09090b] pointer-events-none" />
 
