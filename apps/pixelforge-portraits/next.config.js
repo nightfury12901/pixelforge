@@ -29,6 +29,10 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'gen.pollinations.ai',
       },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
     ],
     formats: ['image/webp', 'image/avif'],
   },

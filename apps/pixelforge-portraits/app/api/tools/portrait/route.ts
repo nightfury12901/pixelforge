@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/server';
 import { checkCredits, deductCredits, canAccessTemplate } from '@/lib/credits';
 import { getTemplateById, trackTemplateUsage } from '@/lib/templates';
-import { generatePortrait } from '@/lib/api/pollinations';
+import { generatePortrait } from '@/lib/api/fal';
 import { checkRateLimit } from '@/lib/ratelimit';
 
 export async function POST(request: NextRequest) {
@@ -166,7 +166,7 @@ async function generatePortraitAsync(
     const aspectRatio = tier === 'pro' || tier === 'lifetime' ? '3:4' : '3:4';
     const numInferenceSteps = tier === 'pro' || tier === 'lifetime' ? 35 : 28;
 
-    // Generate with Replicate
+    // Generate with Fal
     const result = await generatePortrait({
       prompt: promptTemplate,
       image: `data:image/jpeg;base64,${imageBase64}`,

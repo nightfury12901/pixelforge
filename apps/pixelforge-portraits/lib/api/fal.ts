@@ -132,10 +132,11 @@ export async function generatePortrait(options: PortraitGenerationOptions) {
 
         let width = 768;
         let height = 1024;
+        let imageSizeStr = 'portrait_4_3';
 
-        if (options.aspect_ratio === '16:9') { width = 1024; height = 576; }
-        else if (options.aspect_ratio === '9:16') { width = 576; height = 1024; }
-        else if (options.aspect_ratio === '1:1') { width = 1024; height = 1024; }
+        if (options.aspect_ratio === '16:9') { width = 1024; height = 576; imageSizeStr = 'landscape_16_9'; }
+        else if (options.aspect_ratio === '9:16') { width = 576; height = 1024; imageSizeStr = 'portrait_16_9'; }
+        else if (options.aspect_ratio === '1:1') { width = 1024; height = 1024; imageSizeStr = 'square_hd'; }
 
         const generateSingle = async () => {
             // Use FaceID (PuLID) if a reference image is provided
@@ -144,9 +145,13 @@ export async function generatePortrait(options: PortraitGenerationOptions) {
                     input: {
                         prompt: options.prompt,
                         reference_image_url: options.image,
-                        image_size: { width, height },
+                        image_size: imageSizeStr as any,
                         num_inference_steps: options.num_inference_steps || 20,
-                        guidance_scale: options.guidance_scale || 3.5
+                        guidance_scale: options.guidance_scale || 4,
+                        negative_prompt: "bad quality, worst quality, text, signature, watermark, extra limbs",
+                        true_cfg: 1,
+                        id_weight: 1,
+                        enable_safety_checker: true
                     },
                 }) as any;
 

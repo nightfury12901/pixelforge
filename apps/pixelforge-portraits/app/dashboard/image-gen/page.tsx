@@ -430,7 +430,7 @@ function ImageGenInner() {
 // ─── Page: wraps inner component in Suspense for useSearchParams ─────────────
 export default function ImageGenPage() {
     return (
-        <div className="p-6 md:p-8 pb-24 md:pb-8 w-full max-w-[1600px] mx-auto h-full">
+        <div className="p-6 md:p-8 pb-24 md:pb-8 w-full h-full">
             {/* Header */}
             <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
                 <div className="flex items-center gap-3 mb-1">
