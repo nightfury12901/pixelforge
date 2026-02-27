@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/server';
 import { extractPromptFromImage } from '@/lib/api/groq';
-import { EXTENSION_DAILY_LIMIT } from '@/lib/constants';
+import { TIER_CAPS } from '@/lib/constants';
 
 export async function POST(request: NextRequest) {
   try {
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
     } = await supabase.auth.getUser();
 
     if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized. Please log in to PixelForge AI first.' }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized. Please log in to AuraShot first.' }, { status: 401 });
     }
 
     userId = user.id;
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
     // Get user profile to check extension limits
     const { data: profile } = await supabase
       .from('profiles')
-      .select('extension_prompts_today, extension_prompts_reset_date')
+      .select('extension_prompts_today, extension_prompts_reset_date, tier')
       .eq('id', userId)
       .single() as any;
 
@@ -64,12 +64,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
     }
 
+    // Lazy check IST Reset
+    const nowIST = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+    const todayStr = nowIST.toISOString().split('T')[0];
+
+    const isNewDay = profile.extension_prompts_reset_date !== todayStr;
+    const promptsUsedToday = isNewDay ? 0 : profile.extension_prompts_today;
+
+    const tier = (profile.tier || 'free') as keyof typeof TIER_CAPS;
+    const limit = TIER_CAPS[tier]?.prompt_reversals || 10;
+
     // Check daily limit
-    if (profile.extension_prompts_today >= EXTENSION_DAILY_LIMIT) {
+    if (promptsUsedToday >= limit) {
       return NextResponse.json(
         {
           error: 'Daily limit reached',
-          limit: EXTENSION_DAILY_LIMIT,
+          limit: limit,
           remaining: 0,
           upgrade_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing`,
         },
@@ -91,11 +101,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: result.error }, { status: 500 });
     }
 
-    // Increment daily usage
+    // Increment daily usage and lazily set reset date
     await (adminSupabase as any)
       .from('profiles')
       .update({
-        extension_prompts_today: profile.extension_prompts_today + 1,
+        extension_prompts_today: promptsUsedToday + 1,
+        extension_prompts_reset_date: todayStr
       })
       .eq('id', userId);
 
@@ -103,7 +114,7 @@ export async function POST(request: NextRequest) {
       success: true,
       data: {
         prompt: result.prompt,
-        prompts_remaining: EXTENSION_DAILY_LIMIT - (profile.extension_prompts_today + 1),
+        prompts_remaining: limit - (promptsUsedToday + 1),
         upgrade_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing`,
       },
     });

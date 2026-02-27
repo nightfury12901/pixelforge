@@ -53,7 +53,7 @@ export function Pricing() {
                 key,
                 amount: order.amount,
                 currency: order.currency,
-                name: 'PixelForge AI',
+                name: 'AuraShot',
                 description: `Purchase ${tier.name}`,
                 order_id: order.id,
                 handler: async function (response: any) {

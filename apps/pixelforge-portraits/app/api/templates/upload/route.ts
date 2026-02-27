@@ -38,6 +38,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
+    // ── Security: only allow image file types, max 10MB ──────────────────
+    const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    const MAX_SIZE = 10 * 1024 * 1024; // 10 MB
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      return NextResponse.json(
+        { error: 'Invalid file type. Only JPEG, PNG, and WebP images are allowed.' },
+        { status: 400 },
+      );
+    }
+    if (file.size > MAX_SIZE) {
+      return NextResponse.json(
+        { error: 'File too large. Maximum size is 10MB.' },
+        { status: 400 },
+      );
+    }
+
     // Upload image to Supabase Storage
     const fileExt = file.name.split('.').pop();
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
@@ -72,6 +88,7 @@ export async function POST(request: NextRequest) {
       is_new: isNew,
       is_published: true,
       aspect_ratio: aspectRatio,
+      mask_image: null,
       instagram_example_urls: null,
     });
 

@@ -25,12 +25,12 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-    metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://pixelforge.ai'),
+    metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://aurashot.in'),
     title: {
         default: `${APP_NAME} — Free AI Portrait Generator & Professional Headshots`,
         template: `%s | ${APP_NAME}`,
     },
-    description: 'Create viral, photorealistic AI portraits and professional LinkedIn headshots from your selfies instantly. Try our free AI image generator, background remover, and 4K photo enhancer. Join 10,000+ creators using PixelForge AI for premium avatars and studio-quality photoshoots without the studio price.',
+    description: 'Create viral, photorealistic AI portraits and professional LinkedIn headshots from your selfies instantly. Try our free AI image generator, background remover, and 4K photo enhancer. Join early access creators using AuraShot for premium avatars and studio-quality photoshoots without the studio price.',
     keywords: [
         'AI portrait generator free',
         'professional AI headshot generator',
@@ -63,7 +63,7 @@ export const metadata: Metadata = {
         locale: 'en_IN',
         url: '/',
         title: `${APP_NAME} — The Ultimate AI Portrait & Headshot Studio`,
-        description: 'Turn selfies into professional LinkedIn headshots and viral Instagram portraits in seconds. Try PixelForge AI free today.',
+        description: 'Turn selfies into professional LinkedIn headshots and viral Instagram portraits in seconds. Try AuraShot free today.',
         siteName: APP_NAME,
         images: [
             {
@@ -79,7 +79,7 @@ export const metadata: Metadata = {
         title: `${APP_NAME} — Instant AI Portraits & Studio Headshots`,
         description: 'Generate stunning 4K AI portraits and professional headshots instantly. Start for free!',
         images: ['/og-image.png'],
-        creator: '@pixelforgeai',
+        creator: '@boilerplatLabs',
     },
     alternates: {
         canonical: '/',
@@ -111,7 +111,7 @@ export default function RootLayout({
                             description: 'Create viral, photorealistic AI portraits, LinkedIn headshots, and marketing assets instantly. Features include an AI portrait generator, 4K image enhancer, and HD background remover.',
                             applicationCategory: 'DesignApplication',
                             operatingSystem: 'Web, Windows, macOS, iOS, Android',
-                            url: 'https://pixelforge.ai',
+                            url: 'https://aurashot.in',
                             offers: {
                                 '@type': 'AggregateOffer',
                                 lowPrice: '0',

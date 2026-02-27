@@ -67,7 +67,7 @@ function LoginForm() {
                     <div className="w-10 h-10 bg-gradient-to-r from-primary to-secondary rounded-xl flex items-center justify-center">
                         <span className="text-white font-bold">PF</span>
                     </div>
-                    <span className="font-display font-bold text-2xl">PixelForge</span>
+                    <span className="font-display font-bold text-2xl">AuraShot</span>
                 </Link>
 
                 <div className="bg-white rounded-2xl shadow-gumroad p-8 border border-gray-100">

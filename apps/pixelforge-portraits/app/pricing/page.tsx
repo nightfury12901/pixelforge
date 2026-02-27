@@ -24,7 +24,7 @@ export default function PricingPage() {
                         <div className="w-9 h-9 bg-gradient-to-r from-primary to-secondary rounded-xl flex items-center justify-center">
                             <span className="text-white font-bold text-sm">PF</span>
                         </div>
-                        <span className="font-display font-bold text-xl">PixelForge</span>
+                        <span className="font-display font-bold text-xl">AuraShot</span>
                     </Link>
                     <div className="flex items-center gap-3">
                         <Link href="/auth/login" className="text-sm font-medium text-muted-foreground hover:text-foreground">
@@ -40,7 +40,7 @@ export default function PricingPage() {
             <Pricing />
 
             <footer className="border-t border-gray-100 py-8 text-center text-sm text-muted-foreground">
-                <p>© 2026 PixelForge AI. All rights reserved.</p>
+                <p>© 2026 AuraShot. All rights reserved.</p>
             </footer>
         </main>
     );

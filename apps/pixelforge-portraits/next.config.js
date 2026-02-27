@@ -33,6 +33,10 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'images.unsplash.com',
       },
+      {
+        protocol: 'https',
+        hostname: '**.fal.media',
+      },
     ],
     formats: ['image/webp', 'image/avif'],
   },

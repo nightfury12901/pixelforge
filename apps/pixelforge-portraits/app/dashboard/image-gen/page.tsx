@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, Suspense, useEffect } from 'react';
+import React, { useState, Suspense, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createBrowserClient } from '@supabase/ssr';
 import { toast } from 'react-hot-toast';
+import { AdUnit } from '@/components/AdUnit';
 import Image from 'next/image';
-import { ImagePlus, Wand2, Loader2, Download, Copy, Sparkles } from 'lucide-react';
+import { ImagePlus, Wand2, Loader2, Download, Copy, Sparkles, Upload, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const ASPECT_RATIOS = [
@@ -43,6 +44,7 @@ interface GeneratedImage {
     url: string;
     prompt: string;
     timestamp: number;
+    aspectClass?: string;
 }
 
 // ─── Inner component that reads searchParams ─────────────────────────────────
@@ -58,8 +60,35 @@ function ImageGenInner() {
     const [refining, setRefining] = useState(false);
     const [activeRefineIdx, setActiveRefineIdx] = useState<number | null>(null);
     const [tier, setTier] = useState<string | null>(null);
+
+    // Image Upload State
+    const [imageFile, setImageFile] = useState<File | null>(null);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const fileInputRef = React.useRef<HTMLInputElement>(null);
+
     const router = useRouter();
     const FREE_EDITS = 4;
+
+    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            if (file.size > 5 * 1024 * 1024) {
+                toast.error('Image must be less than 5MB');
+                return;
+            }
+            setImageFile(file);
+            setPreviewUrl(URL.createObjectURL(file));
+        }
+    };
+
+    const fileToBase64 = (file: File): Promise<string> => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve((reader.result as string).split(',')[1]);
+            reader.onerror = (error) => reject(error);
+        });
+    };
 
     useEffect(() => {
         const fetchTier = async () => {
@@ -86,13 +115,19 @@ function ImageGenInner() {
         setLoading(true);
         try {
             const finalPrompt = buildFinalPrompt();
-            const res = await fetch('/api/tools/thumbnail', {
+            let image_base64 = undefined;
+            if (imageFile) {
+                image_base64 = await fileToBase64(imageFile);
+            }
+
+            const res = await fetch('/api/tools/image-gen', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     prompt: finalPrompt,
                     aspect_ratio: selectedAspect.value,
                     batch_size: 1,
+                    image_base64,
                 }),
             });
 
@@ -108,7 +143,7 @@ function ImageGenInner() {
             const images: string[] = data.data?.images || [];
             if (images.length > 0) {
                 setGeneratedImages((prev) => [
-                    ...images.map((url: string) => ({ url, prompt: data.data.enhanced_prompt || finalPrompt, timestamp: Date.now() })),
+                    ...images.map((url: string) => ({ url, prompt: data.data.enhanced_prompt || finalPrompt, timestamp: Date.now(), aspectClass: selectedAspect.class })),
                     ...prev,
                 ]);
                 toast.success('Image generated!');
@@ -129,7 +164,7 @@ function ImageGenInner() {
             const blob = await res.blob();
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
-            a.download = `pixelforge-image-${index + 1}.png`;
+            a.download = `aurashot-image-${index + 1}.png`;
             a.click();
         } catch {
             toast.error('Download failed');
@@ -159,7 +194,7 @@ function ImageGenInner() {
             const images: string[] = data.data?.images || [];
             if (images.length > 0) {
                 setGeneratedImages((prev) => [
-                    ...images.map((url: string) => ({ url, prompt: data.data.refined_prompt || sourceImage.prompt, timestamp: Date.now() })),
+                    ...images.map((url: string) => ({ url, prompt: data.data.refined_prompt || sourceImage.prompt, timestamp: Date.now(), aspectClass: selectedAspect.class })),
                     ...prev,
                 ]);
                 setEditsUsed((n) => n + 1);
@@ -205,6 +240,43 @@ function ImageGenInner() {
                             Surprise Me
                         </button>
                     </div>
+                </div>
+
+                {/* Optional Image Upload */}
+                <div className="flex flex-col gap-2">
+                    <label className="text-sm text-white/90 font-medium">Image (Optional)</label>
+                    <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        className="hidden"
+                        ref={fileInputRef}
+                        onChange={handleFileSelect}
+                    />
+                    {!previewUrl ? (
+                        <div
+                            onClick={() => fileInputRef.current?.click()}
+                            className="w-full h-24 border-2 border-dashed border-white/10 hover:border-violet-500/50 rounded-xl flex flex-col items-center justify-center cursor-pointer transition-colors bg-[#18181A]"
+                        >
+                            <Upload className="h-5 w-5 text-white/40 mb-2" />
+                            <span className="text-xs text-white/40">Upload image to guide generation</span>
+                        </div>
+                    ) : (
+                        <div className="relative w-full h-32 rounded-xl border border-white/10 overflow-hidden group">
+                            <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
+                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                <button
+                                    onClick={() => {
+                                        setImageFile(null);
+                                        setPreviewUrl(null);
+                                        if (fileInputRef.current) fileInputRef.current.value = '';
+                                    }}
+                                    className="p-2 bg-red-500/20 text-red-500 rounded-lg hover:bg-red-500/40 transition-colors"
+                                >
+                                    <X className="h-4 w-4" />
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* Aspect Ratio */}
@@ -278,6 +350,9 @@ function ImageGenInner() {
                     <p className="text-center text-[9px] text-white/30 mt-3 font-medium">
                         1 Credit / Generation • Faster processing
                     </p>
+
+                    {/* Free tier generation ad space */}
+                    <AdUnit slotId="IMAGE_GEN_CONTROLS" format="auto" isFreeTier={tier === 'free'} className="mt-4" />
                 </div>
             </div>
 
@@ -335,7 +410,7 @@ function ImageGenInner() {
                             animate={{ opacity: 1, y: 0 }}
                             className="glass rounded-2xl overflow-hidden"
                         >
-                            <div className={`relative w-full ${selectedAspect.class} bg-black/30`}>
+                            <div className={`relative w-full ${img.aspectClass || 'aspect-square'} bg-black/30`}>
                                 <img
                                     src={img.url}
                                     alt={img.prompt}

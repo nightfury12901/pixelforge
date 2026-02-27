@@ -63,7 +63,7 @@ export function ProcessingStatus({ generationId, templatePreview, onComplete }: 
     if (outputUrl) {
       const link = document.createElement('a');
       link.href = outputUrl;
-      link.download = `pixelforge-${Date.now()}.webp`;
+      link.download = `aurashot-${Date.now()}.webp`;
       link.click();
     }
   };

@@ -183,7 +183,7 @@ export default function ExtractPage() {
                         <div>
                             <p className="text-xs font-medium text-white/60 mb-0.5">Works best with</p>
                             <p className="text-xs text-white/30 leading-relaxed">
-                                Midjourney, Stable Diffusion, DALL·E, or PixelForge AI generated images.
+                                Midjourney, Stable Diffusion, DALL·E, or AuraShot generated images.
                                 Works on portraits, landscapes, concept art, and product photography.
                             </p>
                         </div>

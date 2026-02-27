@@ -12,6 +12,7 @@ export default function EnhancePage() {
     const [imageUrl, setImageUrl] = useState<string | null>(null);
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [enhancedUrl, setEnhancedUrl] = useState<string | null>(null);
+    const [colorize, setColorize] = useState(false);
     const [loading, setLoading] = useState(false);
     const [tier, setTier] = useState<string | null>(null);
     const router = useRouter();
@@ -62,32 +63,21 @@ export default function EnhancePage() {
             const res = await fetch('/api/tools/enhance', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ image_url: base64 }),
+                body: JSON.stringify({ image_url: base64, colorize }),
             });
 
             const data = await res.json();
-            if (!data.success) throw new Error(data.error || 'Enhancement failed');
+            if (!res.ok || !data.success) {
+                throw new Error(data.error || 'Enhancement failed');
+            }
 
-            const generationId = data.data.generation_id;
-            const result = await pollForResult(generationId);
-            if (result) setEnhancedUrl(result);
-            toast.success('Image enhanced!');
+            setEnhancedUrl(data.data.imageUrl);
+            toast.success('Image restored successfully!');
         } catch (error: any) {
             toast.error(error.message || 'Enhancement failed');
         } finally {
             setLoading(false);
         }
-    };
-
-    const pollForResult = async (generationId: string): Promise<string | null> => {
-        for (let i = 0; i < 30; i++) {
-            await new Promise((r) => setTimeout(r, 2000));
-            const res = await fetch(`/api/tools/status?id=${generationId}`);
-            const data = await res.json();
-            if (data.data?.status === 'completed') return data.data.output_image_url;
-            if (data.data?.status === 'failed') throw new Error('Enhancement failed');
-        }
-        throw new Error('Timeout — please try again');
     };
 
     return (
@@ -100,10 +90,10 @@ export default function EnhancePage() {
                         <div className="w-8 h-8 rounded-lg bg-blue-500/20 border border-blue-500/30 flex items-center justify-center">
                             <Wand2 className="h-4 w-4 text-blue-400" />
                         </div>
-                        <h1 className="text-lg font-semibold text-white">AI Enhancer</h1>
-                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-500/15 text-blue-400 border border-blue-500/20">4K Upscale</span>
+                        <h1 className="text-lg font-semibold text-white">AI Photo Restoration</h1>
+                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-500/15 text-blue-400 border border-blue-500/20">Flux Pro Kontext</span>
                     </div>
-                    <p className="text-white/40 text-sm ml-11">Upload an image to enhance it with AI super resolution</p>
+                    <p className="text-white/40 text-sm ml-11">Restore old, damaged, or blurry photos back to life instantly.</p>
                 </motion.div>
 
                 {/* Canvas */}
@@ -159,8 +149,8 @@ export default function EnhancePage() {
                                                 <span /><span /><span />
                                             </div>
                                         </div>
-                                        <p className="text-white/40 text-sm">AI is enhancing...</p>
-                                        <p className="text-white/20 text-xs mt-1">This may take 20–40 seconds</p>
+                                        <p className="text-white/40 text-sm">AI is restoring context...</p>
+                                        <p className="text-white/20 text-xs mt-1">Usually takes ~5 seconds</p>
                                     </motion.div>
                                 ) : enhancedUrl ? (
                                     <motion.div
@@ -201,57 +191,32 @@ export default function EnhancePage() {
             {/* Right Control Panel */}
             <div className="hidden lg:flex flex-col w-72 shrink-0 border-l border-studio-border p-5 gap-5 bg-studio-surface/50">
                 <div>
-                    <h3 className="text-xs font-semibold text-white/40 uppercase tracking-wider mb-4">Enhancement Settings</h3>
+                    <h3 className="text-xs font-semibold text-white/40 uppercase tracking-wider mb-4">Restoration Settings</h3>
 
-                    <div className="space-y-4">
-                        <div>
-                            <label className="text-xs text-white/50 mb-2 block">Upscale Factor</label>
-                            <div className="grid grid-cols-3 gap-2">
-                                {['2×', '4×', '8×'].map((v, i) => (
-                                    <button
-                                        key={v}
-                                        className={`py-2 rounded-xl text-sm font-medium transition-all border ${i === 1
-                                            ? 'bg-blue-600/20 border-blue-500/40 text-blue-300'
-                                            : 'bg-white/[0.04] border-white/[0.06] text-white/40 hover:bg-white/[0.07]'
-                                            }`}
-                                    >
-                                        {v}
-                                    </button>
-                                ))}
-                            </div>
+                    <div className="space-y-6">
+                        {/* Context Description */}
+                        <div className="p-3 rounded-xl border border-blue-500/20 bg-blue-500/[0.02]">
+                            <p className="text-xs text-blue-200/60 leading-relaxed">
+                                <strong className="text-blue-300">Flux Pro Kontext</strong> analyzes the entire scene to intelligently deblur, remove scratches, and restore faces perfectly without losing the original identity.
+                            </p>
                         </div>
 
-                        <div>
-                            <label className="text-xs text-white/50 mb-2 block">Enhancement Mode</label>
-                            <div className="space-y-2">
-                                {['Auto (Recommended)', 'Photo Realistic', 'Artistic'].map((mode, i) => (
-                                    <button
-                                        key={mode}
-                                        className={`w-full py-2.5 px-3 rounded-xl text-sm text-left transition-all border ${i === 0
-                                            ? 'bg-blue-600/15 border-blue-500/30 text-blue-300'
-                                            : 'bg-white/[0.03] border-white/[0.05] text-white/40 hover:bg-white/[0.06]'
-                                            }`}
-                                    >
-                                        {mode}
-                                    </button>
-                                ))}
+                        {/* Colorize Toggle */}
+                        <div className="flex items-center justify-between p-3 rounded-xl border border-white/[0.06] bg-white/[0.02]">
+                            <div>
+                                <h4 className="text-sm font-medium text-white/90">Colorize B&W</h4>
+                                <p className="text-[10px] text-white/40 mt-0.5">Add natural colors</p>
                             </div>
-                        </div>
-
-                        <div>
-                            <div className="flex justify-between mb-2">
-                                <label className="text-xs text-white/50">Sharpness</label>
-                                <span className="text-xs text-blue-400">75%</span>
-                            </div>
-                            <input type="range" min="0" max="100" defaultValue="75" className="w-full accent-blue-500 h-1.5 rounded-full bg-white/10 cursor-pointer" />
-                        </div>
-
-                        <div>
-                            <div className="flex justify-between mb-2">
-                                <label className="text-xs text-white/50">Noise Reduction</label>
-                                <span className="text-xs text-blue-400">50%</span>
-                            </div>
-                            <input type="range" min="0" max="100" defaultValue="50" className="w-full accent-blue-500 h-1.5 rounded-full bg-white/10 cursor-pointer" />
+                            <button
+                                onClick={() => setColorize(!colorize)}
+                                className={`w-11 h-6 rounded-full transition-colors relative ${colorize ? 'bg-blue-500' : 'bg-white/10'}`}
+                            >
+                                <motion.div
+                                    className="absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow-sm"
+                                    animate={{ x: colorize ? 20 : 0 }}
+                                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                                />
+                            </button>
                         </div>
                     </div>
                 </div>

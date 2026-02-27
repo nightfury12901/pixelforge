@@ -23,7 +23,7 @@ const posts = [
     },
     {
         title: 'AI Image Enhancement: From Blurry to 4K',
-        excerpt: 'How AI super resolution works and why PixelForge AI delivers the best results for image upscaling.',
+        excerpt: 'How AI super resolution works and why AuraShot delivers the best results for image upscaling.',
         date: '2026-01-05',
         category: 'Technology',
         readTime: '6 min',
@@ -46,7 +46,7 @@ export default function BlogPage() {
                         <div className="w-9 h-9 bg-gradient-to-r from-primary to-secondary rounded-xl flex items-center justify-center">
                             <span className="text-white font-bold text-sm">PF</span>
                         </div>
-                        <span className="font-display font-bold text-xl">PixelForge</span>
+                        <span className="font-display font-bold text-xl">AuraShot</span>
                     </Link>
                     <Link href="/auth/signup" className="text-sm font-medium bg-primary text-white px-4 py-2 rounded-xl hover:bg-primary-600">
                         Sign Up Free
@@ -85,7 +85,7 @@ export default function BlogPage() {
             </section>
 
             <footer className="border-t border-gray-100 py-8 text-center text-sm text-muted-foreground">
-                <p>© 2026 PixelForge AI. All rights reserved.</p>
+                <p>© 2026 AuraShot. All rights reserved.</p>
             </footer>
         </main>
     );

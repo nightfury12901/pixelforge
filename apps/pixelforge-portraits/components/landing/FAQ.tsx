@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 
 const faqs = [
     {
-        q: 'How does PixelForge AI work?',
+        q: 'How does AuraShot work?',
         a: 'Upload any selfie or portrait photo, choose from 25+ AI styles, and our AI generates a stunning portrait in under 30 seconds.',
     },
     {

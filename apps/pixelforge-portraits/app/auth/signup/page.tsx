@@ -17,6 +17,21 @@ export default function SignupPage() {
     const [loading, setLoading] = useState(false);
     const router = useRouter();
 
+    // After successful signup/login, auto-download any pending image from landing page
+    // This runs once on mount — if user was redirected here after clicking 'Download HD'
+    const triggerPendingDownload = () => {
+        try {
+            const pending = sessionStorage.getItem('pending_download_image');
+            if (pending) {
+                sessionStorage.removeItem('pending_download_image');
+                const a = document.createElement('a');
+                a.href = pending;
+                a.download = `aurashot-preview-${Date.now()}.jpg`;
+                a.click();
+            }
+        } catch { /* ignore */ }
+    };
+
     const supabase = createBrowserClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -39,6 +54,7 @@ export default function SignupPage() {
             if (error) throw error;
 
             toast.success('Check your email for the confirmation link!');
+            triggerPendingDownload();
         } catch (error: any) {
             toast.error(error.message || 'Signup failed');
         } finally {
@@ -54,6 +70,7 @@ export default function SignupPage() {
             },
         });
         if (error) toast.error(error.message);
+        else triggerPendingDownload();
     };
 
     return (
@@ -67,7 +84,7 @@ export default function SignupPage() {
                     <div className="w-10 h-10 bg-gradient-to-r from-primary to-secondary rounded-xl flex items-center justify-center">
                         <span className="text-white font-bold">PF</span>
                     </div>
-                    <span className="font-display font-bold text-2xl">PixelForge</span>
+                    <span className="font-display font-bold text-2xl">AuraShot</span>
                 </Link>
 
                 <div className="bg-white rounded-2xl shadow-gumroad p-8 border border-gray-100">

@@ -66,7 +66,7 @@ export function Sidebar() {
           <ImageIcon className="h-6 w-6 text-white" />
         </div>
         <div>
-          <h1 className="text-xl font-bold text-foreground">PixelForge</h1>
+          <h1 className="text-xl font-bold text-foreground">AuraShot</h1>
           <p className="text-xs text-muted-foreground">AI Portraits</p>
         </div>
       </div>

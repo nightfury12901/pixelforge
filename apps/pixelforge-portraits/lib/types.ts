@@ -32,6 +32,7 @@ export interface PortraitTemplate {
   popularity_score: number;
   usage_count: number;
   aspect_ratio: string | null;
+  mask_image: string | null;
   instagram_example_urls: string[] | null;
   created_at: string;
   updated_at: string;
@@ -47,7 +48,7 @@ export interface TemplateCategory {
 export interface Generation {
   id: string;
   user_id: string;
-  operation_type: 'portrait' | 'enhance' | 'background_remove';
+  operation_type: 'portrait' | 'enhance' | 'background_remove' | 'beautify';
   template_id: string | null;
   template?: PortraitTemplate;
   input_image_url: string | null;
@@ -66,7 +67,7 @@ export interface CreditTransaction {
   id: string;
   user_id: string;
   credits_used: number;
-  operation_type: 'portrait' | 'enhance' | 'background_remove' | 'prompt_extract';
+  operation_type: 'portrait' | 'enhance' | 'background_remove' | 'beautify' | 'prompt_extract';
   template_id: string | null;
   created_at: string;
 }

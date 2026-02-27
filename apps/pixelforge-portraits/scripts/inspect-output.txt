@@ -1,0 +1,258 @@
+=== COLUMNS ===
+id, name, description, preview_image_url, prompt_template, category, tier, is_trending, is_new, is_published, popularity_score, usage_count, instagram_example_urls, created_at, updated_at, aspect_ratio, mask_image
+
+=== SAMPLE RECORD ===
+id: "2014db56-b33a-4b77-90fb-1c99dd552894"
+name: "Still Among Chaos"
+description: "A cinematic long-range elevated headshot of a young man standing motionless in the middle of a busy crosswalk while pedestrians rush past him in heav
+preview_image_url: "/templates/1771502242394-wrqjrs.png"
+prompt_template: "A young man standing still on a busy crosswalk while people rush past in motion blur, slightly elevated perspective, long-range headshot view from ab
+category: "lifestyle"
+tier: "starter"
+is_trending: false
+is_new: true
+is_published: true
+popularity_score: 0
+usage_count: 0
+instagram_example_urls: null
+created_at: "2026-02-19T11:57:24.417376+00:00"
+updated_at: "2026-02-19T11:57:24.417376+00:00"
+aspect_ratio: "9:16"
+mask_image: null
+
+=== ALL TEMPLATES ===
+[PUB] Academic Lecturer Portrait
+  preview_image_url: /templates/1771526004913-phkawg.jpeg
+  template_image: undefined
+  mask_image: null
+  category: professional, tier: free
+[PUB] Ancient Hanuman
+  preview_image_url: /templates/1771518697444-jofr6e.png
+  template_image: undefined
+  mask_image: null
+  category: indian, tier: starter
+[PUB] Anime Cel Shaded
+  preview_image_url: /templates/1771526023529-rb2c2o.jpeg
+  template_image: undefined
+  mask_image: null
+  category: artistic, tier: free
+[PUB] Blessing Aura
+  preview_image_url: /templates/1771517862202-avxbt.png
+  template_image: undefined
+  mask_image: null
+  category: artistic, tier: starter
+[PUB] Blessing from Maa Saraswati
+  preview_image_url: /templates/1771524406015-8h2mx.png
+  template_image: undefined
+  mask_image: null
+  category: indian, tier: free
+[PUB] Boardroom Presence
+  preview_image_url: /templates/1771525997389-x4y1cg.jpeg
+  template_image: undefined
+  mask_image: null
+  category: professional, tier: free
+[PUB] Cosmic Protector Lord Vishnu
+  preview_image_url: /templates/1771519174195-ku8hto.png
+  template_image: undefined
+  mask_image: null
+  category: indian, tier: starter
+[PUB] Creative Director Portrait
+  preview_image_url: /templates/1771526001134-d654zq.jpeg
+  template_image: undefined
+  mask_image: null
+  category: professional, tier: free
+[PUB] Cyberpunk Neon Glow
+  preview_image_url: /templates/1771526022021-n6hnu1.jpeg
+  template_image: undefined
+  mask_image: null
+  category: artistic, tier: free
+[PUB] Divine Love
+  preview_image_url: /templates/1771518221645-oe4blj.png
+  template_image: undefined
+  mask_image: null
+  category: indian, tier: free
+[PUB] Diwali Fireworks Terrace
+  preview_image_url: /templates/diwali.png
+  template_image: undefined
+  mask_image: null
+  category: indian, tier: pro
+[PUB] Embers of the Fallen
+  preview_image_url: /templates/1771498018074-34q78c.png
+  template_image: undefined
+  mask_image: https://gilvupohmuinhokltyvh.supabase.co/storage/v1/object/public/templates/masks/5f229d07-946c-4a7a-bcb7-0c5e0be210af-mask.png
+  category: lifestyle, tier: free
+[PUB] Executive Office Portrait
+  preview_image_url: /templates/1771525994148-wz09kw.jpeg
+  template_image: undefined
+  mask_image: null
+  category: professional, tier: free
+[PUB] Film Noir Monochrome
+  preview_image_url: /templates/1771526027777-qzj6qo.jpeg
+  template_image: undefined
+  mask_image: null
+  category: artistic, tier: free
+[PUB] Finance Professional Look
+  preview_image_url: /templates/1771526000076-pg7kgu.jpeg
+  template_image: undefined
+  mask_image: null
+  category: professional, tier: free
+[PUB] Flute With Krishna
+  preview_image_url: /templates/1771516974302-qm29sr.png
+  template_image: undefined
+  mask_image: null
+  category: lifestyle, tier: starter
+[PUB] Golden Hour Breeze
+  preview_image_url: /templates/beach.png
+  template_image: undefined
+  mask_image: null
+  category: lifestyle, tier: free
+[PUB] Golden Silence
+  preview_image_url: /templates/1771499599717-4z0a2.png
+  template_image: undefined
+  mask_image: https://gilvupohmuinhokltyvh.supabase.co/storage/v1/object/public/templates/masks/ae06fd41-ae8b-4dc8-aa55-0eb0680797fb-mask.png
+  category: lifestyle, tier: free
+[PUB] Holi Splash
+  preview_image_url: /templates/holi.png
+  template_image: undefined
+  mask_image: null
+  category: indian, tier: starter
+[PUB] Loverboy
+  preview_image_url: /templates/1771515630927-qel548.png
+  template_image: undefined
+  mask_image: null
+  category: lifestyle, tier: starter
+[PUB] Luxury Branding Professional
+  preview_image_url: /templates/1771526011107-d0jvfp.jpeg
+  template_image: undefined
+  mask_image: null
+  category: professional, tier: free
+[PUB] Midnight Ascend
+  preview_image_url: /templates/1771501308160-w7pxgr.png
+  template_image: undefined
+  mask_image: https://gilvupohmuinhokltyvh.supabase.co/storage/v1/object/public/templates/masks/fe332817-ce66-4363-9f87-4d8ad2411662-mask.png
+  category: lifestyle, tier: starter
+[PUB] Minimal White Background Headshot
+  preview_image_url: /templates/1771525998411-ac28id.jpeg
+  template_image: undefined
+  mask_image: null
+  category: professional, tier: free
+[PUB] Monochrome Vibe
+  preview_image_url: /templates/1771502527736-etu2en.png
+  template_image: undefined
+  mask_image: null
+  category: artistic, tier: starter
+[PUB] Pop Art Explosion
+  preview_image_url: /templates/1771526029192-tpqlgb.jpeg
+  template_image: undefined
+  mask_image: null
+  category: artistic, tier: free
+[PUB] Renaissance Oil Painting
+  preview_image_url: /templates/1771526020706-wckqgl.jpeg
+  template_image: undefined
+  mask_image: null
+  category: artistic, tier: free
+[PUB] Retro Bollywood
+  preview_image_url: /templates/retro bollywood.png
+  template_image: undefined
+  mask_image: null
+  category: professional, tier: starter
+[PUB] Saree Elegance
+  preview_image_url: /templates/saree.png
+  template_image: undefined
+  mask_image: null
+  category: indian, tier: free
+[PUB] Scarlet Vision
+  preview_image_url: /templates/1771500713446-t1hoq4.png
+  template_image: undefined
+  mask_image: https://gilvupohmuinhokltyvh.supabase.co/storage/v1/object/public/templates/masks/d817bd39-41e0-4359-89fe-a3e05709e467-mask.png
+  category: lifestyle, tier: starter
+[PUB] Shiv Meditation
+  preview_image_url: /templates/1771516822043-4dri0s.png
+  template_image: undefined
+  mask_image: null
+  category: lifestyle, tier: starter
+[PUB] Startup Founder Creative Look
+  preview_image_url: /templates/1771525996424-x05b79.jpeg
+  template_image: undefined
+  mask_image: null
+  category: professional, tier: free
+[PUB] Still Among Chaos
+  preview_image_url: /templates/1771502242394-wrqjrs.png
+  template_image: undefined
+  mask_image: null
+  category: lifestyle, tier: starter
+[PUB] Street Graffiti Mural
+  preview_image_url: /templates/1771526025738-4laqoc.jpeg
+  template_image: undefined
+  mask_image: null
+  category: artistic, tier: free
+[PUB] Timeless Authority
+  preview_image_url: /templates/1771504042970-54y0h.png
+  template_image: undefined
+  mask_image: null
+  category: professional, tier: free
+[PUB] Tropical Serenity
+  preview_image_url: /templates/tropical.png
+  template_image: undefined
+  mask_image: null
+  category: lifestyle, tier: free
+[PUB] Ultra Professional Studio Headshot
+  preview_image_url: /templates/1771525985761-9hrnch.jpeg
+  template_image: undefined
+  mask_image: null
+  category: professional, tier: free
+[PUB] Valentine's Special
+  preview_image_url: /templates/couple.png
+  template_image: undefined
+  mask_image: null
+  category: artistic, tier: pro
+[PUB] Watercolor Dreamscape
+  preview_image_url: /templates/1771526026699-i6fnhf.jpeg
+  template_image: undefined
+  mask_image: null
+  category: artistic, tier: free
+[PUB] Young Professional Ambient Light
+  preview_image_url: /templates/1771526019835-fnsqmi.jpeg
+  template_image: undefined
+  mask_image: null
+  category: professional, tier: free
+
+=== MASK FILES ===
+  academic_lecturer_portrait.png
+  ancient_hanuman.png
+  anime_cel_shaded.png
+  blessing from maa saraswati.png
+  blessing_aura.png
+  boardroom_presence.png
+  cosmic_protector_lord_vishnu.png
+  creative_director_portrait.png
+  cyberpunk_neon_glow.png
+  divine_love.png
+  embers_of_the_fallen.png
+  executive_office_portrait.png
+  film_noir_monochrome.png
+  finance_professional_look.png
+  flute_with_krishna.png
+  golden_silence.png
+  loverboy.png
+  luxury_branding_professional.png
+  midnight_ascend.png
+  minimal_white_background_headshot.png
+  monochrome_vibe.png
+  pop_art_explosion.png
+  renaissance_oil_painting.png
+  scarlet_vision.png
+  shiv_meditation.png
+  startup_founder_creative_look.png
+  still_among_chaos.png
+  street_graffiti_mural.png
+  timelessauthority.png
+  ultra_professional_studio_headshot.png
+  watercolor_dreamscape.png
+  young_professional_ambient_light.png
+
+=== STORAGE BUCKETS ===
+  templates (public: true)
+    root: masks, templates
+    masks/: 5f229d07-946c-4a7a-bcb7-0c5e0be210af-mask.png, ae06fd41-ae8b-4dc8-aa55-0eb0680797fb-mask.png, d817bd39-41e0-4359-89fe-a3e05709e467-mask.png, fe332817-ce66-4363-9f87-4d8ad2411662-mask.png ...
+    templates/: 1771498018074-34q78c.png, 1771499599717-4z0a2.png, 1771500240510-ureli.png, 1771500713446-t1hoq4.png, 1771501261391-27chum.png ...

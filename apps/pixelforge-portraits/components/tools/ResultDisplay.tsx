@@ -13,7 +13,7 @@ interface ResultDisplayProps {
 
 export function ResultDisplay({ imageUrl, label = 'Result', onReset }: ResultDisplayProps) {
     const handleDownload = () => {
-        downloadImage(imageUrl, `pixelforge-${Date.now()}.png`);
+        downloadImage(imageUrl, `aurashot-${Date.now()}.png`);
         toast.success('Image downloaded!');
     };
 
@@ -21,7 +21,7 @@ export function ResultDisplay({ imageUrl, label = 'Result', onReset }: ResultDis
         try {
             if (navigator.share) {
                 await navigator.share({
-                    title: 'My PixelForge AI Creation',
+                    title: 'My AuraShot Creation',
                     text: 'Check out this AI-generated image!',
                     url: imageUrl,
                 });

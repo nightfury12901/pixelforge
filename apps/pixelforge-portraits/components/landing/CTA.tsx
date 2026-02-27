@@ -14,24 +14,17 @@ export function CTA() {
                         </div>
 
                         <h2 className="text-3xl md:text-5xl font-bold mb-4 text-white font-display tracking-tight">
-                            Ready to Go Viral?
+                            Your Best Portrait is One Click Away
                         </h2>
                         <p className="text-lg text-white/50 max-w-xl mx-auto mb-8 leading-relaxed">
-                            Join 10,000+ Indian creators making stunning AI portraits.
-                            Start creating today — no credit card needed.
+                            Join thousands of Indian creators already using AuraShot.
                         </p>
 
-                        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                        <div className="flex justify-center">
                             <Link href="/auth/signup">
-                                <button className="h-12 px-8 rounded-xl text-black bg-white hover:bg-white/90 font-semibold transition-colors flex items-center gap-2">
-                                    <Sparkles className="h-4 w-4" />
-                                    Get Started Free
-                                    <ArrowRight className="h-4 w-4" />
-                                </button>
-                            </Link>
-                            <Link href="/pricing">
-                                <button className="h-12 px-8 rounded-xl text-white/60 bg-white/5 hover:bg-white/10 border border-white/10 font-medium transition-colors">
-                                    Compare Plans
+                                <button className="h-14 px-10 rounded-xl text-black bg-white hover:bg-white/90 font-semibold transition-colors flex items-center gap-2 text-lg shadow-[0_0_20px_rgba(255,255,255,0.3)]">
+                                    <Sparkles className="h-5 w-5" />
+                                    Create My Portrait Free <span aria-hidden="true">&rarr;</span>
                                 </button>
                             </Link>
                         </div>

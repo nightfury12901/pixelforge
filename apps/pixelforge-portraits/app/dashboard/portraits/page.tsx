@@ -53,9 +53,9 @@ export default function PortraitsPage() {
                     <div className="w-14 h-14 rounded-2xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center mx-auto mb-4">
                         <Sparkles className="h-6 w-6 text-violet-400/60" />
                     </div>
-                    <h3 className="font-semibold text-white/60 mb-2">Templates coming soon</h3>
+                    <h3 className="font-semibold text-white/60 mb-2">No templates available</h3>
                     <p className="text-sm text-white/30 leading-relaxed">
-                        Run the database SQL from the implementation plan, then add templates via Supabase Table Editor.
+                        Check back soon — new portrait styles are on their way!
                     </p>
                 </div>
             ) : (

@@ -9,6 +9,8 @@ import {
 } from 'lucide-react';
 import { createBrowserClient } from '@supabase/ssr';
 import toast from 'react-hot-toast';
+import { useEffect, useState } from 'react';
+import { AdUnit } from '@/components/AdUnit';
 
 const tools = [
     {
@@ -72,6 +74,19 @@ export function StudioSidebar() {
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     );
+
+    const [tier, setTier] = useState<string | null>(null);
+
+    useEffect(() => {
+        const fetchTier = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                const { data } = await supabase.from('profiles').select('tier').eq('id', user.id).single();
+                setTier(data?.tier || 'free');
+            }
+        };
+        fetchTier();
+    }, []);
 
     const handleLogout = async () => {
         await supabase.auth.signOut();
@@ -176,6 +191,11 @@ export function StudioSidebar() {
 
                 {/* Bottom: Upgrade + Logout */}
                 <div className="flex flex-col items-center gap-2 px-2 mt-auto">
+                    {/* Free Tier AdSense Sidebar Ad */}
+                    <div className="w-[60px] mx-auto overflow-hidden">
+                        <AdUnit slotId="SIDEBAR_NAV" format="rectangle" isFreeTier={tier === 'free'} className="!my-2 scale-75 origin-bottom" />
+                    </div>
+
                     <Link href="/pricing" className="w-full">
                         <motion.div
                             whileHover={{ scale: 1.05 }}

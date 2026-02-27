@@ -9,7 +9,7 @@ export default function BlogSlugsPage() {
                         <div className="w-9 h-9 bg-gradient-to-r from-primary to-secondary rounded-xl flex items-center justify-center">
                             <span className="text-white font-bold text-sm">PF</span>
                         </div>
-                        <span className="font-display font-bold text-xl">PixelForge</span>
+                        <span className="font-display font-bold text-xl">AuraShot</span>
                     </Link>
                 </div>
             </nav>

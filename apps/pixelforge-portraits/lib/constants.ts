@@ -1,10 +1,10 @@
 import { PricingTier, TemplateCategory } from './types';
 
 // App constants
-export const APP_NAME = 'PixelForge AI';
+export const APP_NAME = 'AuraShot';
 export const APP_TAGLINE = 'AI Portrait Generator, Image Enhancer & Background Remover';
 export const APP_DESCRIPTION =
-  'Create viral AI portraits in 25+ Instagram-trending styles. Used by 10,000+ creators. Free Chrome extension + powerful web tools.';
+  'Create viral AI portraits in 25+ Instagram-trending styles. Free Chrome extension + powerful web tools.';
 
 // SEO
 export const SEO_KEYWORDS = [
@@ -19,79 +19,125 @@ export const SEO_KEYWORDS = [
   'LinkedIn headshot AI',
 ];
 
-// Credits
-export const CREDITS_CONFIG = {
-  free: 2, // Give a generous free tier of 2 credits for testers
-  starter: 5,
-  creator: 12,
-  pro: 25,
+// Usage caps based on tiers (replacing old credits logic)
+export const TIER_CAPS = {
+  free: {
+    portraits: 3, // Lifetime
+    enhance: 0,
+    background_remove: 0,
+    beautify: 0,
+    prompt_reversals: 10, // Daily
+  },
+  starter: {
+    portraits: 5,
+    enhance: 5,
+    background_remove: 10,
+    beautify: 0,
+    prompt_reversals: 20, // Daily
+  },
+  creator: {
+    portraits: 15,
+    enhance: 15,
+    background_remove: 25,
+    beautify: 10,
+    prompt_reversals: 50, // Daily
+  },
+  pro: {
+    portraits: 40,
+    enhance: 40,
+    background_remove: 60,
+    beautify: 30,
+    prompt_reversals: 100, // Daily
+  },
 };
 
+// Operation aliases
 export const OPERATION_COSTS = {
   portrait: 1,
-  enhance: 0,         // FREE
-  background_remove: 0, // FREE
-  prompt_extract: 0,
+  enhance: 1,
+  background_remove: 1,
+  beautify: 1,
+  prompt_extract: 1,
   thumbnail: 1,
   image_gen: 1,
   image_edit: 1,
   ad_gen: 1,
   video_5s: 1,
   video_10s: 2,
-  batch_10: 10,       // Batch costs 1 per image
+  batch_10: 10,
 };
 
-// Extension limits
-export const EXTENSION_DAILY_LIMIT = 10;
+// Rate limits
+export const RATE_LIMITS = {
+  free: {
+    requests: 20,
+    window: 60, // seconds
+  },
+  starter: {
+    requests: 100,
+    window: 60,
+  },
+  creator: {
+    requests: 150,
+    window: 60,
+  },
+  pro: {
+    requests: 200,
+    window: 60,
+  }
+};
 
 // Pricing tiers (India-optimized, One-Time)
 export const PRICING_TIERS: PricingTier[] = [
   {
     id: 'starter',
-    name: 'Starter Packs',
-    description: 'Entry-level impulse buy, good for testing quality',
-    price: 199,
+    name: 'Starter Tier',
+    description: 'Portraits + Enhancement + BG Removal',
+    price: 149,
     currency: 'INR',
     interval: 'one-time',
-    credits: 5,
+    credits: 5, // Legacy field
     features: [
-      '5 Portrait Generations',
-      '1 Curated Preset',
-      'Standard Resolution Export',
-      'No 4K Export',
-      'No Batch Processing',
+      '5 AI Portraits',
+      '5 Enhancements',
+      '10 Background Removals',
+      '20 Prompt Reversals/day',
     ],
   },
   {
     id: 'creator',
-    name: 'Creator Pack',
-    description: 'Best value, feels like a deal, high perceived value',
+    name: 'Creator Tier',
+    description: 'Perfect for regular content creators. Includes Beautification.',
     price: 299,
     currency: 'INR',
     interval: 'one-time',
-    credits: 12,
+    credits: 15, // Legacy field
     features: [
-      '12 Portrait Generations',
+      '15 AI Portraits',
+      '15 Enhancements',
+      '25 Background Removals',
+      '10 Beautifications',
+      '50 Prompt Reversals/day',
       'Access to All Presets',
-      '4K Export Included',
-      'Background Removal Included',
     ],
     popular: true,
   },
   {
     id: 'pro',
-    name: 'Pro Pack',
-    description: 'For heavy users, protects margins, increases AOV',
-    price: 499,
+    name: 'Pro Tier',
+    description: 'For heavy users and professionals. Maximum value.',
+    price: 799,
     currency: 'INR',
     interval: 'one-time',
-    credits: 25,
+    credits: 40, // Legacy field
     features: [
-      '25 Portrait Generations',
-      'Access to All Presets',
-      '4K Export Included',
-      'Background Removal Included',
-      'Batch processing (up to 10 images)',
+      '40 AI Portraits',
+      '40 Enhancements',
+      '60 Background Removals',
+      '30 Beautifications',
+      '100 Prompt Reversals/day',
+      'Priority Queue Processing',
+      'Custom Prompts',
     ],
   }
 ];
@@ -124,6 +170,7 @@ export const API_ENDPOINTS = {
   tools: {
     portrait: '/api/tools/portrait',
     enhance: '/api/tools/enhance',
+    beautify: '/api/tools/beautify',
     backgroundRemove: '/api/tools/background-remove',
     promptExtract: '/api/tools/prompt-extract',
     status: '/api/tools/status',
@@ -138,33 +185,13 @@ export const API_ENDPOINTS = {
   },
 };
 
-// Rate limits
-export const RATE_LIMITS = {
-  free: {
-    requests: 10,
-    window: 60, // seconds
-  },
-  starter: {
-    requests: 100,
-    window: 60,
-  },
-  creator: {
-    requests: 150,
-    window: 60,
-  },
-  pro: {
-    requests: 200,
-    window: 60,
-  }
-};
-
 // Social links
 export const SOCIAL_LINKS = {
-  twitter: 'https://twitter.com/pixelforgeai',
-  instagram: 'https://instagram.com/pixelforgeai',
-  youtube: 'https://youtube.com/@pixelforgeai',
+  twitter: 'https://twitter.com/aurashot',
+  instagram: 'https://instagram.com/aurashot',
+  youtube: 'https://youtube.com/@aurashot',
 };
 
 // Support
-export const SUPPORT_EMAIL = 'support@pixelforge.ai';
-export const CHROME_EXTENSION_URL = 'https://chrome.google.com/webstore/detail/pixelforge-ai/xxxxx';
+export const SUPPORT_EMAIL = 'support@aurashot.in';
+export const CHROME_EXTENSION_URL = 'https://chrome.google.com/webstore/detail/aurashot-ai/xxxxx';

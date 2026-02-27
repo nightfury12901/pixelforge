@@ -1,6 +1,6 @@
 {
-    "name": "PixelForge AI",
-    "short_name": "PixelForge",
+    "name": "AuraShot",
+    "short_name": "AuraShot",
     "description": "AI Portrait Generator, Image Enhancer & Background Remover",
     "start_url": "/",
     "display": "standalone",

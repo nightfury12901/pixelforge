@@ -13,13 +13,13 @@ const sampleStyles = [
 
 export function TemplateShowcase() {
     return (
-        <section className="py-24 bg-[#09090b] relative border-t border-white/5">
+        <section className="py-24 bg-[#09090b] relative">
             <div className="container mx-auto px-4">
                 <div className="text-center mb-16 animate-fadeInUp">
                     <span className="text-sm font-semibold text-violet-400 tracking-wider">TEMPLATES</span>
-                    <h2 className="text-4xl md:text-5xl font-bold mt-4 mb-4 text-white font-display tracking-tight">Endless Possibilities</h2>
+                    <h2 className="text-4xl md:text-5xl font-bold mt-4 mb-4 text-white font-display tracking-tight">Pick Your Style. We Do the Rest.</h2>
                     <p className="text-lg text-white/50 max-w-2xl mx-auto">
-                        From Bollywood glamour to Corporate headshots. Discover our growing library of templates.
+                        From Bollywood glamour to corporate headshots — new styles added weekly.
                     </p>
                 </div>
 
@@ -32,7 +32,6 @@ export function TemplateShowcase() {
                         >
                             <div className={`absolute inset-0 bg-gradient-to-br ${style.color} opacity-40 mix-blend-color z-10`} />
 
-                            {/* Template Image */}
                             <img
                                 src={style.image}
                                 alt={style.name}
@@ -53,9 +52,13 @@ export function TemplateShowcase() {
                     ))}
                 </div>
 
-                <p className="text-center text-white/30 mt-12 text-sm">
-                    Preview styles — your uploaded photos will replace these placeholders
-                </p>
+                <div className="flex justify-center mt-12 animate-fadeInUp">
+                    <a href="/dashboard">
+                        <button className="h-12 px-8 rounded-xl bg-white/10 text-white font-semibold flex items-center gap-2 hover:bg-white/20 transition-all border border-white/20 shadow-lg">
+                            Explore All 25+ Styles <span>&rarr;</span>
+                        </button>
+                    </a>
+                </div>
             </div>
         </section>
     );

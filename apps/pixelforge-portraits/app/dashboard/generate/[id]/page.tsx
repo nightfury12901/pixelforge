@@ -11,7 +11,7 @@ import { Sparkles, Upload, ArrowLeft, Wand2, Loader2, ImageIcon } from 'lucide-r
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ImageUploader } from '@/components/tools/ImageUploader';
-import { ProcessingStatus } from '@/components/tools/ProcessingStatus';
+import { AdUnit } from '@/components/AdUnit';
 import { imageToBase64 } from '@/lib/utils';
 import type { PortraitTemplate } from '@/lib/types';
 import { AlertCircle } from 'lucide-react';
@@ -24,7 +24,6 @@ export default function GeneratePage() {
     const [uploadedImage, setUploadedImage] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [processing, setProcessing] = useState(false);
-    const [generationId, setGenerationId] = useState<string | null>(null);
     const [tier, setTier] = useState<string | null>(null);
     const [isBatch, setIsBatch] = useState(false);
 
@@ -72,30 +71,43 @@ export default function GeneratePage() {
 
         try {
             const base64 = await imageToBase64(uploadedImage);
+            // Strip the data URI prefix if present — API expects raw base64
+            const rawBase64 = base64.includes(',') ? base64.split(',')[1] : base64;
+
             const res = await fetch('/api/tools/portrait', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ template_id: template.id, image_base64: base64, is_batch: isBatch }),
+                body: JSON.stringify({
+                    templateId: template.id,      // ← API expects camelCase templateId
+                    userFaceBase64: rawBase64,     // ← API expects userFaceBase64
+                }),
             });
 
             const data = await res.json();
             if (!res.ok) {
                 if (res.status === 402) return router.push('/pricing');
-                throw new Error(data.error || 'Failed');
+                throw new Error(data.error || 'Generation failed');
             }
 
-            setGenerationId(data.data.generation_id);
-            toast.success('Generating your portrait...');
+            // API returns imageUrl directly (synchronous)
+            if (data.imageUrl) {
+                toast.success('Portrait generated!');
+                // Store result in session storage and redirect to result page
+                sessionStorage.setItem('portrait_result', JSON.stringify({
+                    imageUrl: data.imageUrl,
+                    templateName: template.name,
+                    templatePreview: template.preview_image_url,
+                }));
+                router.push('/dashboard/portraits/result');
+            } else {
+                throw new Error('No image returned');
+            }
         } catch (err: any) {
             toast.error(err.message);
             setProcessing(false);
         }
     };
 
-    const handleComplete = () => {
-        setProcessing(false);
-        router.push('/dashboard/history');
-    };
 
     if (loading) {
         return (
@@ -169,13 +181,14 @@ export default function GeneratePage() {
 
                 {/* Right Col: Action Area */}
                 <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="flex flex-col h-full">
-                    {processing && generationId ? (
-                        <div className="bg-gray-900/50 border border-white/10 rounded-3xl p-8 flex-1 flex flex-col items-center justify-center text-center">
-                            <ProcessingStatus
-                                generationId={generationId}
-                                templatePreview={template.preview_image_url}
-                                onComplete={handleComplete}
-                            />
+                    {processing ? (
+                        <div className="bg-gray-900/50 border border-white/10 rounded-3xl p-8 flex-1 flex flex-col items-center justify-center text-center gap-4">
+                            <div className="relative w-14 h-14">
+                                <Loader2 className="h-14 w-14 animate-spin text-violet-500/30" />
+                                <Sparkles className="absolute inset-0 m-auto h-5 w-5 text-violet-400" />
+                            </div>
+                            <p className="text-white/70 font-medium">Generating your portrait...</p>
+                            <p className="text-white/30 text-sm">This usually takes 15–45 seconds</p>
                         </div>
                     ) : (
                         <div className="space-y-8 bg-gray-900/30 border border-white/5 rounded-3xl p-6 lg:p-8 flex-1">
@@ -247,6 +260,8 @@ export default function GeneratePage() {
                                 <p className="text-xs text-center text-muted-foreground mt-3">
                                     Read our <a href="#" className="underline">Terms of Service</a> regarding AI generation.
                                 </p>
+
+                                <AdUnit slotId="PORTRAIT_GEN" format="auto" isFreeTier={tier === 'free'} className="mt-6" />
                             </div>
                         </div>
                     )}

@@ -65,55 +65,37 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Image URL required' }, { status: 400 });
     }
 
-    // 5 Free Daily Background Removals Logic
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const { count } = await (adminSupabase as any)
-      .from('generations')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', user.id)
-      .eq('operation_type', 'background_remove')
-      .gte('created_at', today.toISOString());
-
-    const hasExceededFreeLimit = count !== null && count >= 5;
-    let creditsRemaining = profile.credits_remaining;
-    let creditsUsedForThis = 0;
-
-    if (hasExceededFreeLimit) {
-      const creditsCheck = await checkCredits(user.id);
-      if (!creditsCheck.hasCredits) {
-        return NextResponse.json(
-          { error: 'Daily free limit reached (5/5). Please purchase a pack to continue removing backgrounds.', remaining: 0 },
-          { status: 402 }
-        );
-      }
-
-      // Deduct 1 credit using an operation that costs 1 (e.g., 'image_edit' costs 1)
-      const deductResult = await deductCredits(user.id, 'image_edit');
-      if (!deductResult.success) {
-        return NextResponse.json({ error: deductResult.error }, { status: 400 });
-      }
-      creditsRemaining = deductResult.remaining;
-      creditsUsedForThis = 1;
+    // Check credits
+    const creditsCheck = await checkCredits(user.id, 'background_remove');
+    if (!creditsCheck.hasCredits) {
+      return NextResponse.json(
+        { error: 'Insufficient limits for background removal. Upgrade pack.', remaining: creditsCheck.remaining },
+        { status: 402 }
+      );
     }
 
-    // Create generation record
+    // Deduct credits
+    const deductResult = await deductCredits(user.id, 'background_remove');
+    if (!deductResult.success) {
+      return NextResponse.json({ error: deductResult.error }, { status: 400 });
+    }
+
+    const creditsRemaining = creditsCheck.remaining - 1;
+    const creditsUsedForThis = 1;
+
+    // Create generation record (must use 'background_remove' — DB check constraint)
     const { data: generation, error: genError } = await (adminSupabase as any)
       .from('generations')
       .insert({
         user_id: user.id,
         operation_type: 'background_remove',
-        input_image_url: image_url,
-        status: 'processing',
-        credits_used: creditsUsedForThis,
       })
       .select()
       .single();
 
     if (genError || !generation) {
-      console.error('Failed to create generation record:', genError);
-      return NextResponse.json({ error: 'Failed to create generation record' }, { status: 500 });
+      console.error('Failed to create generation record:', genError?.message);
+      // Don't block on this — proceed anyway
     }
 
     // Remove background

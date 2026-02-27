@@ -1,19 +1,31 @@
-import { NextResponse } from 'next/server';
-import { generateImageWithFal } from '@/lib/api/fal';
+import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@/lib/supabase/server';
+import { generateImageNanaBanana2 } from '@/lib/api/fal';
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
     try {
-        const { prompt } = await req.json();
+        // ── Auth check — prevents unauthenticated cost burn on fal.ai ──────────
+        const supabase = createClient();
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
+        if (authError || !user) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
 
-        if (!prompt) {
+        const body = await req.json();
+        const { prompt } = body;
+
+        if (!prompt || typeof prompt !== 'string') {
             return NextResponse.json({ error: 'Prompt is required' }, { status: 400 });
         }
 
-        const result = await generateImageWithFal(prompt, '3:4');
+        // Cap prompt length — prevents abuse / prompt injection
+        const trimmedPrompt = prompt.trim().slice(0, 500);
+
+        const result = await generateImageNanaBanana2(trimmedPrompt);
 
         if (!result.success || !result.url) {
             return NextResponse.json(
-                { error: result.error || 'Failed to generate image from Fal API' },
+                { error: result.error || 'Failed to generate image' },
                 { status: 500 }
             );
         }

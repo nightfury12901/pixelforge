@@ -59,49 +59,47 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { image_url } = body;
+    const { image_url, colorize = false } = body;
 
     if (!image_url) {
       return NextResponse.json({ error: 'Image URL required' }, { status: 400 });
     }
 
     // Check credits
-    const creditsCheck = await checkCredits(user.id);
+    const creditsCheck = await checkCredits(user.id, 'enhance');
     if (!creditsCheck.hasCredits) {
       return NextResponse.json(
-        { error: 'Insufficient credits', remaining: 0 },
+        { error: 'Insufficient limits for enhancement. Upgrade pack.', remaining: creditsCheck.remaining },
         { status: 402 }
       );
     }
 
-    // Deduct credits
-    const deductResult = await deductCredits(user.id, 'enhance');
-    if (!deductResult.success) {
-      return NextResponse.json({ error: deductResult.error }, { status: 400 });
+    // Run Flux Pro Kontext synchronously
+    console.log('[enhance] calling flux-pro/kontext for user', user.id, 'colorize:', colorize);
+    const result = await enhanceImage(image_url, colorize);
+
+    if (!result.success || !result.imageUrl) {
+      return NextResponse.json(
+        { error: result.error || 'Enhancement failed' },
+        { status: 500 }
+      );
     }
 
-    // Create generation record
-    const { data: generation } = await (adminSupabase as any)
-      .from('generations')
-      .insert({
-        user_id: user.id,
-        operation_type: 'enhance',
-        input_image_url: image_url,
-        status: 'processing',
-        credits_used: 1,
-      })
-      .select()
-      .single();
+    // Deduct credit after success
+    await deductCredits(user.id, 'enhance');
 
-    // Enhance image
-    enhanceImageAsync(generation!.id, user.id, image_url);
+    // Create generation record (non-blocking, standard columns only)
+    (adminSupabase as any).from('generations').insert({
+      user_id: user.id,
+      operation_type: 'enhance',
+    }).then(({ error }: any) => {
+      if (error) console.warn('[enhance] insert warning:', error.message);
+    });
 
     return NextResponse.json({
       success: true,
       data: {
-        generation_id: generation!.id,
-        status: 'processing',
-        credits_remaining: deductResult.remaining,
+        imageUrl: result.imageUrl,
       },
     });
   } catch (error: any) {
@@ -110,40 +108,5 @@ export async function POST(request: NextRequest) {
       { success: false, error: error.message },
       { status: 500 }
     );
-  }
-}
-
-async function enhanceImageAsync(generationId: string, userId: string, imageUrl: string) {
-  const adminSupabase = createAdminClient();
-  const startTime = Date.now();
-
-  try {
-    const result = await enhanceImage(imageUrl);
-
-    if (!result.success || !result.output) {
-      throw new Error(result.error || 'Enhancement failed');
-    }
-
-    const outputUrl = Array.isArray(result.output) ? result.output[0] : result.output;
-
-    await (adminSupabase as any)
-      .from('generations')
-      .update({
-        output_image_url: outputUrl,
-        status: 'completed',
-        processing_time_ms: Date.now() - startTime,
-      })
-      .eq('id', generationId);
-  } catch (error: any) {
-    console.error('Async enhancement error:', error);
-
-    await (adminSupabase as any)
-      .from('generations')
-      .update({
-        status: 'failed',
-        error_message: error.message,
-        processing_time_ms: Date.now() - startTime,
-      })
-      .eq('id', generationId);
   }
 }

@@ -1,18 +1,39 @@
+/**
+ * app/api/tools/portrait/route.ts
+ *
+ * POST body:
+ *   userFaceBase64:    string   — raw base64 (no data URI prefix)
+ *   templateId?:       string   — preset template ID from DB  (Mode A)
+ *   customImageBase64? string   — Creator+ only scene image   (Mode B)
+ *   prompt?:           string   — override prompt for Mode B
+ *
+ * Model routing (Mode A):
+ *   7 Artistic templates (anime, oil painting, etc.) → fal-ai/nano-banana-2/edit
+ *   ALL other templates                              → fal-ai/ideogram/v3/edit (mask inpaint)
+ *   Non-artistic with no mask                       → blocked (coming soon)
+ *
+ * Cost: $0.05–$0.12 = ₹4.60–₹11
+ */
+
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/server';
-import { checkCredits, deductCredits, canAccessTemplate } from '@/lib/credits';
-import { getTemplateById, trackTemplateUsage } from '@/lib/templates';
-import { generatePortrait } from '@/lib/api/fal';
-import { checkRateLimit } from '@/lib/ratelimit';
+import { checkCredits, deductCredits, getCreditsRemaining } from '@/lib/credits';
+import {
+  generatePortraitIdeogramV3,
+  generatePortraitNanaBanana2,
+  ARTISTIC_TEMPLATE_NAMES,
+} from '@/lib/api/fal';
+import { analyzeFaceFeatures, buildEnrichedPrompt } from '@/lib/api/face-analysis';
+import { generateFaceMask, uploadTempMaskToSupabase } from '@/lib/api/mask-generator';
+import { applyWatermark } from '@/lib/watermark';
 
-export async function POST(request: NextRequest) {
-  const startTime = Date.now();
+// ─── Route Handler ────────────────────────────────────────────────────────────
 
+export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
+    // ── 1. Auth ──────────────────────────────────────────────────────────────
     const supabase = createClient();
-    const adminSupabase = createAdminClient();
-
     const {
       data: { user },
       error: authError,
@@ -22,193 +43,190 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get user profile for tier and rate limiting
-    const { data: profile } = await (supabase as any)
+    // ── 2. Profile / tier ────────────────────────────────────────────────────
+    const adminDb = createAdminClient() as any;
+
+    const { data: profile, error: profileError } = await adminDb
       .from('profiles')
-      .select('tier')
+      .select('tier, credits_reset_date, created_at')
       .eq('id', user.id)
       .single();
 
-    if (!profile) {
+    if (profileError || !profile) {
       return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
     }
 
-    // Rate limiting
-    const rateLimit = await checkRateLimit(user.id, profile.tier);
-    if (!rateLimit.success) {
+    const tier: string = profile.tier ?? 'free';
+
+    // ── 3. Credit check ──────────────────────────────────────────────────────
+    const creditCheck = await checkCredits(user.id, 'portrait');
+    if (!creditCheck.allowed) {
       return NextResponse.json(
         {
-          error: 'Rate limit exceeded',
-          limit: rateLimit.limit,
-          remaining: rateLimit.remaining,
-          reset: rateLimit.reset,
+          error: 'Portrait credits exhausted. Upgrade to continue.',
+          used: creditCheck.used,
+          limit: creditCheck.limit,
         },
-        { status: 429 }
+        { status: 403 },
       );
     }
 
+    // ── 4. Parse body ────────────────────────────────────────────────────────
     const body = await request.json();
-    const { template_id, image_base64, is_batch } = body;
+    const {
+      userFaceBase64,
+      templateId,
+      customImageBase64,
+      prompt: customPrompt,
+    }: {
+      userFaceBase64: string;
+      templateId?: string;
+      customImageBase64?: string;
+      prompt?: string;
+    } = body;
 
-    const operationType = is_batch ? 'batch_10' : 'portrait';
-    const numGenerations = is_batch ? 10 : 1;
-
-    if (!template_id || !image_base64) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    if (!userFaceBase64) {
+      return NextResponse.json({ error: 'userFaceBase64 is required' }, { status: 400 });
     }
 
-    // Pro tier required for batch
-    if (is_batch && profile.tier !== 'pro') {
-      return NextResponse.json(
-        { error: 'Pro Pack required for batch processing' },
-        { status: 403 }
-      );
-    }
+    // ── 5. Determine mode ────────────────────────────────────────────────────
+    let templateImageUrl: string = '';
+    let maskImageUrl: string = '';
+    let basePrompt: string = '';
+    let resolvedTemplateId: string | undefined;
+    let useIdeogramModel = true;   // true → ideogram/v3/edit (default), false → nano-banana-2/edit
+    let templateAspectRatio = '2:3';
 
-    // Get template
-    const template = await getTemplateById(template_id);
-    if (!template) {
-      return NextResponse.json({ error: 'Template not found' }, { status: 404 });
-    }
-
-    // Check template access
-    if (!canAccessTemplate(profile.tier, template.tier)) {
-      return NextResponse.json(
-        { error: 'Upgrade required to use this template' },
-        { status: 403 }
-      );
-    }
-
-    // Check credits
-    const creditsCheck = await checkCredits(user.id);
-    if (!creditsCheck.hasCredits) {
-      return NextResponse.json(
-        { error: 'Insufficient credits', remaining: 0 },
-        { status: 402 }
-      );
-    }
-
-    // Deduct credits
-    const deductResult = await deductCredits(user.id, operationType, template_id);
-    if (!deductResult.success) {
-      return NextResponse.json({ error: deductResult.error }, { status: 400 });
-    }
-
-    // Create generation records
-    const newGenerations: any[] = [];
-    for (let i = 0; i < numGenerations; i++) {
-      const { data: generation, error: createError } = await (adminSupabase as any)
-        .from('generations')
-        .insert({
-          user_id: user.id,
-          operation_type: 'portrait',
-          template_id,
-          status: 'processing',
-          credits_used: is_batch ? 1 : 1, // Store 1 per generation record
-        })
-        .select()
+    if (templateId) {
+      // ── Mode A: Preset template ─────────────────────────────────────────
+      const { data: template, error: templateError } = await adminDb
+        .from('portrait_templates')
+        .select('id, name, preview_image_url, mask_image, prompt_template, aspect_ratio')
+        .eq('id', templateId)
         .single();
 
-      if (!createError && generation) {
-        newGenerations.push(generation);
+      if (templateError || !template) {
+        return NextResponse.json({ error: 'Template not found' }, { status: 404 });
       }
-    }
 
-    if (newGenerations.length === 0) {
-      return NextResponse.json({ error: 'Failed to create generation' }, { status: 500 });
-    }
+      const templateName: string = template.name as string;
+      const isArtistic = ARTISTIC_TEMPLATE_NAMES.has(templateName);
+      const hasMask = !!template.mask_image;
 
-    // Track template usage
-    await trackTemplateUsage(template_id, user.id);
+      // Routing:
+      // - Artistic templates           → nano-banana-2/edit (art style transfer)
+      // - Non-artistic WITH mask       → ideogram/character/edit (face inpainting)
+      // - Non-artistic WITHOUT mask    → fall back to nano-banana-2/edit (no coming soon)
+      const useNanaBanana = isArtistic || !hasMask;
+      useIdeogramModel = !useNanaBanana;
 
-    // Generate portraits asynchronously
-    for (const gen of newGenerations) {
-      generatePortraitAsync(
-        gen.id,
-        user.id,
-        template.prompt_template,
-        image_base64,
-        profile.tier
+      templateImageUrl = template.preview_image_url as string;
+      maskImageUrl = (template.mask_image as string) ?? '';
+      basePrompt = template.prompt_template as string;
+      templateAspectRatio = (template.aspect_ratio as string) ?? '2:3';
+      resolvedTemplateId = templateId;
+
+    } else if (customImageBase64) {
+      // ── Mode B: Custom image upload (Creator+ only) ─────────────────────
+      if (tier === 'free' || tier === 'starter') {
+        return NextResponse.json(
+          { error: 'Custom image upload is a Creator+ feature. Upgrade to unlock.' },
+          { status: 403 },
+        );
+      }
+
+      templateImageUrl = `data:image/jpeg;base64,${customImageBase64}`;
+
+      // Generate mask on-the-fly
+      const maskBuffer = await generateFaceMask(templateImageUrl);
+      maskImageUrl = await uploadTempMaskToSupabase(maskBuffer, user.id);
+
+      basePrompt =
+        customPrompt ??
+        'Person in a professional cinematic setting, high quality, realistic lighting, editorial photography style.';
+
+    } else {
+      return NextResponse.json(
+        { error: 'Provide either templateId or customImageBase64.' },
+        { status: 400 },
       );
     }
 
-    return NextResponse.json({
-      success: true,
-      data: {
-        generation_id: newGenerations[0].id, // Frontend currently polls one ID, they can check history for the rest
-        status: 'processing',
-        message: is_batch ? 'Batch generation started (10 variations)' : 'Portrait generation started',
-        credits_remaining: deductResult.remaining,
-      },
-    });
-  } catch (error: any) {
-    console.error('Portrait generation error:', error);
-    return NextResponse.json(
-      { success: false, error: error.message },
-      { status: 500 }
-    );
-  }
-}
+    // ── 6. Build user face URL ────────────────────────────────────────────────
+    const userFaceUrl = userFaceBase64.startsWith('data:')
+      ? userFaceBase64
+      : `data:image/jpeg;base64,${userFaceBase64}`;
 
-// Async function to handle portrait generation
-async function generatePortraitAsync(
-  generationId: string,
-  userId: string,
-  promptTemplate: string,
-  imageBase64: string,
-  tier: string
-) {
-  const adminSupabase = createAdminClient();
-  const startTime = Date.now();
+    // ── 7. Face feature analysis ──────────────────────────────────────────────
+    const features = await analyzeFaceFeatures(userFaceBase64);
+    const enrichedPrompt = buildEnrichedPrompt(basePrompt, features);
+    const userDescription = features
+      ? Object.entries(features as unknown as Record<string, string>)
+        .map(([k, v]) => `${k}: ${v}`)
+        .join(', ')
+      : 'a person';
 
-  try {
-    // Determine output quality based on tier
-    const aspectRatio = tier === 'pro' || tier === 'lifetime' ? '3:4' : '3:4';
-    const numInferenceSteps = tier === 'pro' || tier === 'lifetime' ? 35 : 28;
+    // ── 8. Portrait generation (routed by template type) ──────────────────
+    let rawImageUrl: string;
 
-    // Generate with Fal
-    const result = await generatePortrait({
-      prompt: promptTemplate,
-      image: `data:image/jpeg;base64,${imageBase64}`,
-      num_outputs: 1,
-      aspect_ratio: aspectRatio,
-      output_format: 'webp',
-      guidance_scale: 3.5,
-      num_inference_steps: numInferenceSteps,
-    });
-
-    if (!result.success || !result.output) {
-      throw new Error(result.error || 'Generation failed');
+    if (useIdeogramModel) {
+      // Non-artistic template: mask-based face inpaint via ideogram/v3/edit
+      console.log('[portrait/route] → ideogram/v3/edit (professional/lifestyle)');
+      if (!maskImageUrl) {
+        return NextResponse.json(
+          { error: 'Template is missing a mask. Please contact support.' },
+          { status: 500 },
+        );
+      }
+      const result = await generatePortraitIdeogramV3({
+        userFaceUrl,
+        templateImageUrl,
+        maskUrl: maskImageUrl,
+        prompt: enrichedPrompt,
+      });
+      rawImageUrl = result.imageUrl;
+    } else {
+      // Artistic template: art-style transfer via nano-banana-2/edit
+      console.log('[portrait/route] → nano-banana-2/edit (artistic style transfer)');
+      const result = await generatePortraitNanaBanana2({
+        userFaceUrl,
+        templateImageUrl,
+        templatePrompt: basePrompt,
+        userDescription,
+        aspectRatio: templateAspectRatio,
+      });
+      rawImageUrl = result.imageUrl;
     }
 
-    const outputUrl = Array.isArray(result.output) ? result.output[0] : result.output;
+    // ── 9. Watermark (free tier only) ─────────────────────────────────────────
+    let finalImageUrl: string;
 
-    // Update generation record
-    await (adminSupabase as any)
-      .from('generations')
-      .update({
-        output_image_url: outputUrl,
-        status: 'completed',
-        processing_time_ms: Date.now() - startTime,
-      })
-      .eq('id', generationId);
-  } catch (error: any) {
-    console.error('Async generation error:', error);
+    if (tier === 'free') {
+      const imageRes = await fetch(rawImageUrl);
+      if (!imageRes.ok) throw new Error('Failed to fetch generated image for watermarking');
+      const imageBuffer = Buffer.from(await imageRes.arrayBuffer());
+      const watermarked = await applyWatermark(imageBuffer);
+      finalImageUrl = `data:image/png;base64,${watermarked.toString('base64')}`;
+    } else {
+      finalImageUrl = rawImageUrl;
+    }
 
-    // Update generation with error
-    await (adminSupabase as any)
-      .from('generations')
-      .update({
-        status: 'failed',
-        error_message: error.message,
-        processing_time_ms: Date.now() - startTime,
-      })
-      .eq('id', generationId);
+    // ── 10. Deduct credit (only after successful generation) ────────────────
+    await deductCredits(user.id, 'portrait', finalImageUrl, resolvedTemplateId);
 
-    // Refund credit
-    await (adminSupabase as any).rpc('increment', {
-      row_id: userId,
-      x: 1,
+    // ── 11. Return ───────────────────────────────────────────────────────────
+    const creditsRemaining = await getCreditsRemaining(user.id);
+
+    return NextResponse.json({
+      imageUrl: finalImageUrl,
+      creditsRemaining,
     });
+
+  } catch (err: any) {
+    console.error('[portrait/route] unhandled error:', err);
+    return NextResponse.json(
+      { error: err?.message ?? 'Portrait generation failed' },
+      { status: 500 },
+    );
   }
 }

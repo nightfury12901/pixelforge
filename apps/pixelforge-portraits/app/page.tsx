@@ -3,15 +3,16 @@ import { Hero } from '@/components/landing/Hero';
 import { Features } from '@/components/landing/Features';
 import { HowItWorks } from '@/components/landing/HowItWorks';
 import { TemplateShowcase } from '@/components/landing/TemplateShowcase';
+import { Testimonials } from '@/components/landing/Testimonials';
 import { Pricing } from '@/components/landing/Pricing';
 import { FAQ } from '@/components/landing/FAQ';
 import { CTA } from '@/components/landing/CTA';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-    title: 'PixelForge AI — The Best AI Portrait Generator & Editor Online',
+    title: 'AuraShot — The Best AI Portrait Generator & Editor Online',
     description:
-        'Transform your selfies into professional LinkedIn headshots and viral Instagram portraits in seconds. Try PixelForge AI, the top-rated AI image enhancer, background remover & free Chrome extension used by over 10,000 creators. Over 25+ premium styles including cinematic, corporate, and artistic.',
+        'Transform your selfies into professional LinkedIn headshots and viral Instagram portraits in seconds. Try AuraShot, the top-rated AI image enhancer, background remover & free Chrome extension used by thousands of creators. Over 25+ premium styles including cinematic, corporate, and artistic.',
     keywords: [
         'AI portrait generator free',
         'professional AI headshot generator India',
@@ -27,16 +28,16 @@ export const metadata: Metadata = {
         'corporate headshot AI'
     ],
     openGraph: {
-        title: 'PixelForge AI — Premium AI Portraits & Professional Headshots',
+        title: 'AuraShot — Premium AI Portraits & Professional Headshots',
         description: 'Generate stunning 4K AI portraits and professional LinkedIn headshots instantly without a studio. Start for free!',
-        url: 'https://pixelforge.ai',
-        siteName: 'PixelForge AI',
+        url: 'https://aurashot.in',
+        siteName: 'AuraShot',
         images: [
             {
                 url: '/og-image.png',
                 width: 1200,
                 height: 630,
-                alt: 'PixelForge AI — Premium AI Portrait Generator',
+                alt: 'AuraShot — Premium AI Portrait Generator',
             },
         ],
         locale: 'en_IN',
@@ -44,13 +45,13 @@ export const metadata: Metadata = {
     },
     twitter: {
         card: 'summary_large_image',
-        title: 'PixelForge AI — Instant Professional Portraits',
-        description: 'Create viral AI portraits and 4K LinkedIn headshots from your selfies. Used by 10,000+ creators.',
-        creator: '@pixelforgeai',
+        title: 'AuraShot — Instant Professional Portraits',
+        description: 'Create viral AI portraits and 4K LinkedIn headshots from your selfies. Used by thousands of creators.',
+        creator: '@aurashot',
         images: ['/og-image.png'],
     },
     alternates: {
-        canonical: 'https://pixelforge.ai',
+        canonical: 'https://aurashot.in',
     },
 };
 
@@ -61,10 +62,8 @@ export default function HomePage() {
             <nav className="sticky top-0 z-50 bg-[#09090b]/95 border-b border-white/5 transition-colors">
                 <div className="container mx-auto px-4 h-16 flex items-center justify-between">
                     <Link href="/" className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-white text-black rounded-lg flex items-center justify-center">
-                            <span className="font-bold text-sm tracking-tighter">PF</span>
-                        </div>
-                        <span className="font-display font-bold text-xl text-white tracking-tight">PixelForge</span>
+                        <img src="/logo.png" alt="AuraShot Logo" className="w-8 h-8 rounded-xl ring-1 ring-white/10 shadow-lg" />
+                        <span className="font-display font-bold text-xl text-white tracking-tight">AuraShot</span>
                     </Link>
 
                     <div className="hidden md:flex items-center gap-8 text-sm font-medium text-white/50">
@@ -92,9 +91,10 @@ export default function HomePage() {
             </nav>
 
             <Hero />
-            <Features />
-            <HowItWorks />
             <TemplateShowcase />
+            <Testimonials />
+            <HowItWorks />
+            <Features />
             <Pricing />
             <FAQ />
             <CTA />
@@ -105,10 +105,8 @@ export default function HomePage() {
                     <div className="grid md:grid-cols-4 gap-8">
                         <div>
                             <div className="flex items-center gap-2 mb-4">
-                                <div className="w-8 h-8 bg-white text-black rounded-lg flex items-center justify-center">
-                                    <span className="font-bold text-xs">PF</span>
-                                </div>
-                                <span className="font-display font-bold text-white tracking-tight">PixelForge</span>
+                                <img src="/logo.png" alt="AuraShot Logo" className="w-8 h-8 rounded-xl ring-1 ring-white/10 shadow-lg" />
+                                <span className="font-display font-bold text-white tracking-tight">AuraShot</span>
                             </div>
                             <p className="text-sm text-white/40">
                                 High-performance AI portrait generation interface.
@@ -126,7 +124,7 @@ export default function HomePage() {
                             <h4 className="font-semibold mb-3 text-sm text-white/80 tracking-tight">Support</h4>
                             <ul className="space-y-2 text-sm text-white/40">
                                 <li><a href="#faq" className="hover:text-white/80 transition-colors">FAQ</a></li>
-                                <li><a href="mailto:support@pixelforge.ai" className="hover:text-white/80 transition-colors">Contact</a></li>
+                                <li><a href="mailto:support@aurashot.in" className="hover:text-white/80 transition-colors">Contact</a></li>
                                 <li><a href="#" className="hover:text-white/80 transition-colors">Privacy Policy</a></li>
                                 <li><a href="#" className="hover:text-white/80 transition-colors">Terms of Service</a></li>
                             </ul>
@@ -134,8 +132,8 @@ export default function HomePage() {
                         <div>
                             <h4 className="font-semibold mb-3 text-sm text-white/80 tracking-tight">Connect</h4>
                             <ul className="space-y-2 text-sm text-white/40">
-                                <li><a href="https://twitter.com/pixelforgeai" className="hover:text-white/80 transition-colors" target="_blank" rel="noopener">Twitter/X</a></li>
-                                <li><a href="https://instagram.com/pixelforgeai" className="hover:text-white/80 transition-colors" target="_blank" rel="noopener">Instagram</a></li>
+                                <li><a href="https://twitter.com/boilerplatLabs" className="hover:text-white/80 transition-colors" target="_blank" rel="noopener">Twitter/X</a></li>
+                                <li><a href="https://instagram.com/editology.06" className="hover:text-white/80 transition-colors" target="_blank" rel="noopener">Instagram</a></li>
                             </ul>
                         </div>
                     </div>
